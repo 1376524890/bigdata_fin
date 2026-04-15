@@ -1,0 +1,104 @@
+\begin{thebibliography}{16}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Fama and French(1989)]{fama1989business}
+Eugene~F Fama and Kenneth~R French.
+\newblock Business conditions and expected returns on stocks and bonds.
+\newblock \emph{Journal of Financial Economics}, 25\penalty0 (1):\penalty0
+  23--49, 1989.
+
+\bibitem[Campbell and Thompson(2008)]{campbell2008predicting}
+John~Y Campbell and Samuel~B Thompson.
+\newblock Predicting excess stock returns out of sample: Can anything beat the
+  historical average?
+\newblock \emph{Review of Financial Studies}, 21\penalty0 (4):\penalty0
+  1509--1531, 2008.
+
+\bibitem[Welch and Goyal(2008)]{welch2008comprehensive}
+Ivo Welch and Amit Goyal.
+\newblock A comprehensive look at the empirical performance of equity premium
+  prediction.
+\newblock \emph{Review of Financial Studies}, 21\penalty0 (4):\penalty0
+  1455--1508, 2008.
+
+\bibitem[戈盈凡(2024)]{ge2024macroeconomic}
+戈盈凡.
+\newblock
+  宏观经济不确定性与股票超额收益：来自中国a股市场的证据.
+\newblock \emph{广东财经大学学报}, 39\penalty0 (2):\penalty0 11--28,
+  2024.
+
+\bibitem[杨何灿 et~al.(2023)杨何灿, 吴隽豪, and
+  杨咸月]{yang2023northbound}
+杨何灿, 吴隽豪, and 杨咸月.
+\newblock
+  北向资金与境内股票市场流动性——基于高频数据的传导机制.
+\newblock \emph{经济研究}, 58\penalty0 (5):\penalty0 190--208, 2023.
+
+\bibitem[He et~al.(2024)He, Li, Tan, and Wang]{he2024timevarying}
+Y~He, W~Li, X~Tan, and Y~Wang.
+\newblock The time-varying interaction of northbound capital flows and stock
+  market performance in china.
+\newblock \emph{Finance Research Letters}, 69:\penalty0 106076, 2024.
+
+\bibitem[Ghysels et~al.(2004)Ghysels, Santa-Clara, and
+  Valkanov]{ghysels2004midas}
+Eric Ghysels, Pedro Santa-Clara, and Rossen Valkanov.
+\newblock The midas touch: Mixed data sampling regression models.
+\newblock Technical Report 2004s-55, CIRANO Working Papers, 2004.
+
+\bibitem[Ghysels et~al.(2006)Ghysels, Santa-Clara, and
+  Valkanov]{ghysels2006midas}
+Eric Ghysels, Pedro Santa-Clara, and Rossen Valkanov.
+\newblock The midas touch: Mixed data sampling regression models.
+\newblock Technical report, CIRANO Working Papers, 2006.
+
+\bibitem[Ghysels et~al.(2007)Ghysels, Sinko, and Valkanov]{ghysels2007midas}
+Eric Ghysels, Arthur Sinko, and Rossen Valkanov.
+\newblock Midas regressions: Further results and new directions.
+\newblock \emph{Econometric Reviews}, 26\penalty0 (1):\penalty0 53--90, 2007.
+
+\bibitem[Schorfheide and Song(2015)]{schorfheide2015realtime}
+Frank Schorfheide and Dongho Song.
+\newblock Real-time forecasting with a mixed-frequency var.
+\newblock \emph{Journal of Business \& Economic Statistics}, 33\penalty0
+  (3):\penalty0 366--380, 2015.
+
+\bibitem[郑挺国 and 尚玉皇(2013)]{zheng2013midas}
+郑挺国 and 尚玉皇.
+\newblock 基于金融指标对中国gdp的混频预测分析.
+\newblock \emph{金融研究}, \penalty0 (9):\penalty0 1--16, 2013.
+
+\bibitem[Baker and Wurgler(2006)]{baker2006investor}
+Malcolm Baker and Jeffrey Wurgler.
+\newblock Investor sentiment and the cross-section of stock returns.
+\newblock \emph{Journal of Finance}, 61\penalty0 (4):\penalty0 1645--1680,
+  2006.
+
+\bibitem[王美今 and 孙建军(2004)]{wang2004investor}
+王美今 and 孙建军.
+\newblock 中国股市收益、收益波动与投资者情绪.
+\newblock \emph{经济研究}, \penalty0 (10):\penalty0 75--83, 2004.
+
+\bibitem[尹海员 and 吴兴颖(2019)]{yin2019highfrequency}
+尹海员 and 吴兴颖.
+\newblock 投资者高频情绪对股票日内收益率的预测作用.
+\newblock \emph{中国工业经济}, \penalty0 (8):\penalty0 80--98, 2019.
+
+\bibitem[梅立兴 et~al.(2019)梅立兴, 张灿, and 何鲁]{mei2019investor}
+梅立兴, 张灿, and 何鲁.
+\newblock
+  投资者情绪与股票收益——来自移动互联网的实证研究.
+\newblock \emph{南方经济}, 38\penalty0 (3):\penalty0 36--53, 2019.
+
+\bibitem[Amihud(2002)]{amihud2002illiquidity}
+Yakov Amihud.
+\newblock Illiquidity and stock returns: Cross-section and time-series effects.
+\newblock \emph{Journal of Financial Markets}, 5\penalty0 (1):\penalty0 31--56,
+  2002.
+
+\end{thebibliography}

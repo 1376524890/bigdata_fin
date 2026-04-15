@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install:*)",
+      "Bash(pip3 install:*)",
+      "Bash(pip3 show:*)",
+      "Read(//usr/local/lib/python3.12/dist-packages/**)",
+      "Bash(ls -la /home/marktom/bigdata-fin/*.md /home/marktom/bigdata-fin/*.txt /home/marktom/bigdata-fin/*.csv)",
+      "Bash(grep -E \"\\\\.\\(md|txt|csv\\)$\")",
+      "Bash(latex --version)",
+      "Bash(pdflatex --version)",
+      "Bash(tlmgr --version)",
+      "Bash(kpsewhich ctex.sty)",
+      "Bash(kpsewhich amsmath.sty)",
+      "Bash(kpsewhich amssymb.sty)",
+      "Bash(kpsewhich xecjk.sty)",
+      "Bash(xelatex -interaction=nonstopmode test.tex)",
+      "Bash(ls -la /home/marktom/bigdata-fin/*.csv /home/marktom/bigdata-fin/*.xlsx /home/marktom/bigdata-fin/*.xls /home/marktom/bigdata-fin/data*)",
+      "Bash(xelatex -interaction=nonstopmode main.tex)"
+    ],
+    "additionalDirectories": [
+      "/tmp"
+    ]
+  }
+}

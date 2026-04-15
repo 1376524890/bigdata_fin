@@ -1,0 +1,9 @@
+Window,Model,Adj_R2,LASSO_Selected
+5d,model1,0.06043846420456611,
+5d,model2,0.06135016204020982,
+5d,model3,0.06301582526720262,
+5d,model4,0.06428179366883657,"['ivix_z', 'north_flow_z', 'margin_balance_z', 'turnover_ratio_z']"
+60d,model1,0.0013568445186156186,
+60d,model2,0.010778737246342929,
+60d,model3,0.01401978989341146,
+60d,model4,0.0013568445186156186,['ivix_z']

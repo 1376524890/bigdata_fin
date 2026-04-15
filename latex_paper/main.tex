@@ -1,0 +1,104 @@
+\documentclass[12pt,a4paper]{ctexart}
+
+% 基础宏包
+\usepackage{geometry}
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+
+% 数学宏包
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+
+% 图表宏包
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{float}
+
+% 颜色与样式
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, fit, backgrounds}
+
+% 超链接（黑色无边框，保留可点击跳转功能）
+\usepackage[hidelinks]{hyperref}
+
+% 参考文献（使用 natbib + 自定义上角标命令模拟 GB/T 7714-2015）
+\usepackage[numbers,sort&compress]{natbib}
+\bibliographystyle{unsrtnat}
+
+% 上角标引用命令（GB/T 7714-2015 顺序编码制样式）
+\newcommand{\upcite}[1]{\textsuperscript{\citep{#1}}}
+
+% 将 \cite 重定义为 \upcite
+\let\cite\upcite
+
+% 代码与算法
+\usepackage{listings}
+% \usepackage{algorithm}
+% \usepackage{algpseudocode}
+
+% 标题格式
+\usepackage{titlesec}
+
+% 页眉页脚
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{\small 宏观经济变量与沪深300指数收益率研究}
+\fancyfoot[C]{\thepage}
+
+% 交叉引用增强
+\usepackage{cleveref}
+
+% 图表标题
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf}
+
+% 三线表专用
+\newcommand{\topline}{\toprule[1.2pt]}
+\newcommand{\midline}{\midrule[0.8pt]}
+\newcommand{\bottomline}{\bottomrule[1.2pt]}
+
+% 定理环境
+\newtheorem{theorem}{定理}
+\newtheorem{lemma}{引理}
+\newtheorem{proposition}{命题}
+\newtheorem{definition}{定义}
+
+% 文档信息
+\title{\textbf{宏观经济变量与沪深300指数收益率：\\基于MIDAS模型的两阶段实证分析}}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+\noindent 股票市场收益率与宏观经济变量之间的关系始终是金融研究中的重要议题。围绕这一问题，本文以沪深300指数为研究对象，构建"宏观变量形成收益预期---市场状态解释预期偏离"的两阶段实证分析框架，尝试从基本面信息与市场实现之间的动态关系出发，考察短线与长线收益窗口下宏观信息、资金行为、情绪波动和流动性状态的不同作用路径。研究样本覆盖2015年7月至2025年12月的日度交易数据，结合月度宏观指标、市场情绪指标、隐含波动率、北向资金、融资融券余额及流动性变量，形成可用于混频建模与偏离解释的统一分析样本。
+
+在研究方法上，第一阶段采用MIDAS混频回归模型，将CPI、PPI、M2同比增速、经济政策不确定性指数以及美元兑人民币汇率等月度宏观变量引入未来5日和60日累计收益率预测方程，通过参数化权重函数刻画低频宏观信息在不同滞后期上的影响强度，并在样本内与样本外两个维度比较单变量模型和精简多变量模型的预测表现。第二阶段以第一阶段生成的条件预期收益率为基准，重新构造异常收益及异常收益绝对值，进一步采用分组嵌套回归识别情绪与风险感知、资金与杠杆交易、流动性与交易状态等变量对收益偏离的边际解释作用，同时结合Newey--West HAC稳健标准误处理重叠收益窗口所带来的序列相关问题。
+
+从研究设计与数据分析结果看，宏观变量进入高频收益率预测时具有明显的期限差异：短窗口收益更易受到交易层面扰动，较长窗口对宏观信息的吸收更充分。市场状态变量之间存在一定相关性，分组嵌套框架更便于识别不同机制的边际贡献。后续实证将在这一基础上进一步比较不同宏观变量在5日与60日窗口中的预测表现，并检验情绪、隐含波动率、资金流向和非流动性因素对异常收益偏离强度的解释能力。
+
+\vspace{1em}
+\noindent\textbf{关键词：}MIDAS模型；沪深300指数；收益率预测；宏观经济变量；异常收益偏离；投资者情绪
+\end{abstract}
+
+\thispagestyle{fancy}
+
+\newpage
+\tableofcontents
+\newpage
+
+% 引入各章节
+\input{chapter1}
+\input{chapter2}
+\input{chapter3}
+
+% 参考文献
+\newpage
+\bibliography{references}
+
+\end{document}

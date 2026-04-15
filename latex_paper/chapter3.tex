@@ -1,0 +1,470 @@
+% 第三章 研究设计
+
+\section{研究设计}
+
+\subsection{研究设计概括}
+
+本文围绕"宏观经济指标如何形成沪深300指数未来收益预期，以及实际收益偏离该预期的机制"展开实证分析，整体采用两阶段研究框架。第一阶段以宏观经济变量为核心信息集，构建沪深300指数未来5日与60日累计收益率的条件预期；第二阶段在此基础上，以实际累计收益率与条件预期收益率之差构造异常收益及其绝对值，并进一步检验市场状态变量对收益偏离的解释作用。
+
+在第一阶段，MIDAS 混频回归用于处理月度宏观变量与日度金融收益率之间的频率不一致问题。考虑到宏观变量对未来收益的影响既存在时滞，又可能呈现不同的传导强度，模型通过参数化权重函数压缩过去若干期低频宏观信息，进而形成不同期限下的条件预期收益率\cite{ghysels2004midas,zheng2013midas}。进入精简多变量模型前，先在训练集上完成 VIF 检验，对共线性水平较高的变量进行剔除或替换，再结合样本外预测表现和经济含义确定保留变量集合。
+
+由第一阶段模型生成的条件预测值构成未来5日和60日收益率的宏观预期水平。基于此，本文构造异常收益 $AR_t^{(h)}$ 以及异常收益绝对值 $AbsAR_t^{(h)}$，其中 $h=5,60$。主结果变量采用异常收益绝对值，以刻画市场相对于宏观预期的偏离强度；方向性异常收益则作为补充结果变量，用于观察偏离方向。
+
+第二阶段采用分组嵌套回归识别异常收益偏离的形成机制。情绪与风险感知变量、资金与杠杆交易变量、流动性与交易状态变量依次进入回归方程。每新增一组变量，除比较调整后 $R^2$ 的变化之外，还对新增变量组进行联合显著性检验，以判断该组变量是否对模型解释力形成实质增量。完整嵌套模型估计完成后，再使用 LASSO 在标准化变量集合上进行辅助筛选，将系数压缩为零的变量排除在综合模型之外。最终综合模型采用具有清晰经济解释的变量集合，并继续使用 OLS 配合 HAC 稳健标准误报告结果。
+
+% 图3-1：研究设计总体框架图
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance=0.8cm and 1.2cm,
+    box1/.style={rectangle, rounded corners, draw=blue!60, fill=blue!5, thick, minimum width=3cm, minimum height=1cm, align=center, font=\small},
+    box2/.style={rectangle, rounded corners, draw=green!60, fill=green!5, thick, minimum width=3cm, minimum height=1cm, align=center, font=\small},
+    arrow/.style={-{Stealth[length=2mm]}, thick},
+    label/.style={font=\small\bfseries}
+]
+
+% 阶段标签（左侧）
+\node[label, blue!70] at (-2,0) {第一阶段};
+\node[label, green!70] at (-2,-2.2) {第二阶段};
+
+% 第一阶段
+\node[box1] (macro) {宏观变量};
+\node[box1, right=of macro] (midas) {MIDAS加权};
+\node[box1, right=of midas] (exp) {条件预期收益};
+
+% 第二阶段
+\node[box2, below=1.5cm of macro] (market) {市场状态变量};
+\node[box2, below=1.5cm of midas] (ar) {异常收益};
+\node[box2, below=1.5cm of exp] (reg) {分组嵌套回归};
+
+% 箭头
+\draw[arrow, blue!60] (macro) -- (midas);
+\draw[arrow, blue!60] (midas) -- (exp);
+\draw[arrow, blue!60] (exp) -- (ar);
+\draw[arrow, green!60] (market) -- (reg);
+\draw[arrow, green!60] (ar) -- (reg);
+
+\end{tikzpicture}
+\caption{研究设计总体框架图}
+\label{fig:design_overview}
+\end{figure}
+
+\subsection{变量定义与数据处理}
+
+本文以沪深300指数为研究对象，核心被解释变量为未来一定持有期内的累计收益率。设交易日 $t$ 的收盘价为 $P_t$，则日对数收益率定义为
+\begin{equation}
+r_t=\ln\left(\frac{P_t}{P_{t-1}}\right)
+\label{eq:daily_return}
+\end{equation}
+在此基础上，分别构造未来5日与未来60日累计收益率：
+\begin{equation}
+R_t^{(h)}=\sum_{s=1}^{h}r_{t+s}=\ln\left(\frac{P_{t+h}}{P_t}\right),\qquad h\in\{5,60\}
+\label{eq:cumulative_return}
+\end{equation}
+其中，$R_t^{(5)}$ 刻画短线收益表现，$R_t^{(60)}$ 对应相对更长的收益窗口。两个变量同时纳入分析，能够比较宏观信息在不同期限上的解释能力，也便于观察短线波动与长线趋势在形成机制上的差异。
+
+第一阶段模型使用的宏观变量主要包括居民消费价格指数同比增速、工业生产者出厂价格指数同比增速、M2同比增速、经济政策不确定性指数以及美元兑人民币汇率。它们分别对应通胀环境、工业价格水平、货币条件、政策预期与外部金融约束等不同层面的宏观信息，能够较为全面地刻画市场所面对的基本面状态。考虑到这些变量大多以月度频率发布，而股票收益率以日频观测，月度数据采用"上一个完整月可得信息"与当前交易日对齐。若以 $m(t)$ 表示交易日 $t$ 所属月份，则任一月度变量 $X_j$ 在交易日 $t$ 的可用值写作
+\begin{equation}
+X_{j,t}^{M}=X_{j,m(t)-1}
+\label{eq:macro_alignment}
+\end{equation}
+若在扩展检验中纳入 GDP，设 $q(t)$ 表示交易日 $t$ 所属季度，则其可用值表示为
+\begin{equation}
+GDP_t^{Q}=GDP_{q(t)-1}
+\label{eq:gdp_alignment}
+\end{equation}
+
+第二阶段的解释变量不再承担生成收益预期的功能，而用于说明实际收益为何偏离宏观预期。围绕这一目的，本文将相关变量划分为三类。第一类是情绪与风险感知变量，包括情绪标准分与隐含波动率指数，它们更接近市场参与者的主观预期与风险定价状态。第二类是资金与杠杆交易变量，包括北向资金净流入和融资融券余额，反映不同类型交易资金对价格的推动作用。第三类为流动性与交易状态变量，包括 Amihud 非流动性指标、20日动量和日内振幅，用于刻画市场微观结构状态以及短期交易拥挤程度。第二阶段所有解释变量统一采用滞后一期形式进入回归，以减弱同期反馈关系带来的干扰。
+
+预处理流程与样本划分同步进行。训练集内完成缩尾阈值估计、标准化参数计算以及后续的变量筛选和模型训练，测试集使用训练集参数完成映射。第二阶段连续解释变量的标准化处理形式为
+\begin{equation}
+Z(x_t)=\frac{x_t-\bar{x}_{train}}{s_{train}}
+\label{eq:standardization_train}
+\end{equation}
+其中，$\bar{x}_{train}$ 和 $s_{train}$ 分别表示训练集均值和训练集标准差。标准化之后，各变量系数可以在统一尺度下进行比较，便于识别哪一类因素对异常收益偏离的影响更为突出。
+
+\subsection{第一阶段：基于 MIDAS 的预期收益模型}
+
+本文第一阶段的目标，是利用宏观变量构造未来5日与60日累计收益率的条件预期。由于月度宏观指标与日度收益率之间存在明显的频率不一致问题，若直接将低频变量以普通滞后项形式放入日频回归，既无法充分体现宏观信息的持续作用，也难以刻画不同滞后期信息的相对重要性。基于此，本文采用 MIDAS 混频回归框架，将过去若干期低频宏观变量通过参数化权重函数压缩为日频时点上的有效解释量，再用于未来收益率预测\cite{ghysels2004midas,ghysels2007midas}。
+
+% 图3-2：MIDAS建模结构
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance=0.8cm and 1.5cm,
+    box/.style={rectangle, rounded corners, draw=blue!60, fill=blue!5, thick, minimum width=2cm, minimum height=0.7cm, align=center, font=\small},
+    sum/.style={circle, draw=blue!60, fill=blue!10, thick, minimum size=0.7cm, font=\small},
+    arrow/.style={-{Stealth[length=2mm]}, thick, blue!60}
+]
+
+% Beta权重函数标注（顶部）
+\node[font=\small] at (3.5,4) {Beta权重函数};
+
+% 月度变量节点
+\node[box] (cpi) {CPI$_{t-1}$};
+\node[box, below=of cpi] (ppi) {PPI$_{t-1}$};
+\node[box, below=of ppi] (m2) {M2$_{t-1}$};
+\node[box, below=of m2] (epu) {EPU$_{t-1}$};
+\node[box, below=of epu] (usd) {USD$_{t-1}$};
+
+% 权重节点
+\node[sum, right=of cpi] (w1) {$w_1$};
+\node[sum, right=of ppi] (w2) {$w_2$};
+\node[sum, right=of m2] (w3) {$w_3$};
+\node[sum, right=of epu] (w4) {$w_4$};
+\node[sum, right=of usd] (w5) {$w_5$};
+
+% MIDAS加权
+\node[box, right=of w3] (midas) {MIDAS加权项};
+
+% 预测
+\node[box, right=of midas] (pred) {$\widehat{R}_t^{(h)}$};
+
+% 箭头
+\foreach \i in {1,...,5} {
+    \draw[arrow] (w\i) -- (midas);
+}
+\draw[arrow] (cpi) -- (w1);
+\draw[arrow] (ppi) -- (w2);
+\draw[arrow] (m2) -- (w3);
+\draw[arrow] (epu) -- (w4);
+\draw[arrow] (usd) -- (w5);
+\draw[arrow] (midas) -- (pred);
+
+\end{tikzpicture}
+\caption{MIDAS建模结构示意图}
+\label{fig:midas_structure}
+\end{figure}
+
+对于任一月度宏观变量 $X_j$，其在预测窗口 $h$ 下的 MIDAS 加权项定义为
+\begin{equation}
+\mathcal{M}_{j,t}^{(h)}=\sum_{\ell=0}^{K_j-1}w_{j,\ell}^{(h)}(\theta_{j,h})X_{j,m(t)-1-\ell}
+\label{eq:midas_weighted}
+\end{equation}
+其中，$K_j$ 表示变量 $X_j$ 纳入的月度滞后长度，本文统一取 $K_j=12$；$w_{j,\ell}^{(h)}(\theta_{j,h})$ 为对应的权重函数，用以刻画不同月份宏观信息对未来收益率的影响强度。主模型使用 Beta 权重函数：
+\begin{equation}
+w_{j,\ell}(a_{j,h},b_{j,h})=\frac{\left(\frac{\ell+1}{K_j+1}\right)^{a_{j,h}-1}\left(1-\frac{\ell+1}{K_j+1}\right)^{b_{j,h}-1}}{\sum_{r=0}^{K_j-1}\left(\frac{r+1}{K_j+1}\right)^{a_{j,h}-1}\left(1-\frac{r+1}{K_j+1}\right)^{b_{j,h}-1}}
+\label{eq:beta_weights}
+\end{equation}
+并满足
+\begin{equation}
+\sum_{\ell=0}^{K_j-1}w_{j,\ell}(a_{j,h},b_{j,h})=1
+\label{eq:weight_sum}
+\end{equation}
+
+在具体估计时，本文首先分别构建单变量 MIDAS 模型。对于宏观变量 $X_j$，未来 $h$ 日累计收益率的单变量预测方程写作
+\begin{equation}
+R_t^{(h)}=\alpha_{j,h}+\beta_{j,h}\mathcal{M}_{j,t}^{(h)}+u_{j,t}^{(h)},\qquad h\in\{5,60\}
+\label{eq:single_midas}
+\end{equation}
+这一阶段逐一考察不同宏观变量在短线与长线收益预测中的独立作用。单变量模型结果除报告系数估计值、t统计量和显著性水平外，还将展示预测值与真实值的可视化对比，以及对应的残差图和残差时间序列图，用于识别拟合偏差和时段性误差聚集。
+
+完成单变量估计后，本文在训练集上对候选宏观变量计算 VIF，并结合样本内统计表现、样本外预测效果和变量的经济含义构建精简多变量 MIDAS 模型。表~\ref{tab:stage1_results}报告了第一阶段主要模型的估计结果。
+
+% 表3-1：第一阶段MIDAS模型估计结果
+\begin{table}[htbp]
+\centering
+\caption{第一阶段 MIDAS 模型估计结果}
+\label{tab:stage1_results}
+\small
+\begin{tabular}{lcccc}
+\topline
+\textbf{模型} & \textbf{预测窗口} & \textbf{$R^2$(样本内)} & \textbf{$R^2$(样本外)} & \textbf{RMSE} \\
+\midline
+单变量最优 & 5日 & 0.0063 & 0.0003 & 0.0265 \\
+精简多变量 & 5日 & 0.0076 & -0.0041 & 0.0266 \\
+\midline
+单变量最优 & 60日 & 0.0528 & 0.0329 & 0.0799 \\
+精简多变量 & 60日 & 0.1110 & -0.1148 & 0.0859 \\
+\bottomline
+\end{tabular}
+\end{table}
+
+注：单变量最优模型基于经济政策不确定性指数（EPU）构建。精简多变量模型经VIF筛选后仅保留PPI。
+\begin{equation}
+R_t^{(h)}=\alpha_h+\sum_{j=1}^{J^*}\beta_{j,h}\mathcal{M}_{j,t}^{(h)}+u_t^{(h)}
+\label{eq:multi_midas}
+\end{equation}
+其中 $J^*\leq 4$。由该模型得到的拟合值即构成未来 $h$ 日累计收益率的宏观预期：
+\begin{equation}
+\widehat{R}_t^{(h)}=\hat{\alpha}_h+\sum_{j=1}^{J^*}\hat{\beta}_{j,h}\mathcal{M}_{j,t}^{(h)}
+\label{eq:expected_return}
+\end{equation}
+
+第一阶段 MIDAS 模型采用非线性最小二乘法进行参数估计。对于任意预测窗口 $h$，其目标函数为
+\begin{equation}
+SSR_h(\Theta_h)=\sum_t\left(R_t^{(h)}-\widehat{R}_t^{(h)}\right)^2
+\label{eq:ssr}
+\end{equation}
+其中 $\Theta_h$ 包含截距、回归系数及权重函数参数。针对未来5日和未来60日收益率，本文分别独立估计模型，而不通过一步预测模型递推生成多步预测值。除数值指标外，实证展示中还将对代表性的单变量模型与精简多变量模型绘制"真实值—预测值"折线图，以直接比较两种模型在不同收益窗口中的拟合与预测表现。
+
+% 表3-1：第一阶段变量与窗口设定
+\begin{table}[htbp]
+\centering
+\caption{第一阶段变量与窗口设定}
+\label{tab:stage1_settings}
+\begin{tabular}{p{3cm}p{2.5cm}p{2cm}p{3cm}p{2cm}}
+\topline
+\textbf{变量} & \textbf{频率} & \textbf{滞后长度} & \textbf{预测窗口} & \textbf{估计方法} \\
+\midline
+CPI同比增速 & 月度 & $K=12$ & $h=5,60$日 & NLS \\
+PPI同比增速 & 月度 & $K=12$ & $h=5,60$日 & NLS \\
+M2同比增速 & 月度 & $K=12$ & $h=5,60$日 & NLS \\
+EPU指数 & 月度 & $K=12$ & $h=5,60$日 & NLS \\
+美元兑人民币汇率 & 月度 & $K=12$ & $h=5,60$日 & NLS \\
+\bottomline
+\end{tabular}
+\end{table}
+
+在扩展检验中，本文进一步将季度 GDP 增速纳入第一阶段模型，以考察实体经济总量指标能否在月度变量之外提供额外信息。GDP 的 MIDAS 加权项定义为
+\begin{equation}
+\mathcal{Q}_{GDP,t}^{(h)}=\sum_{\ell=0}^{K_g-1}v_{\ell}^{(h)}(\psi_h)GDP_{q(t)-1-\ell}
+\label{eq:gdp_midas}
+\end{equation}
+并设 $K_g=4$。扩展模型可写为
+\begin{equation}
+R_t^{(h)}=\alpha_h+\sum_{j=1}^{J^*}\beta_{j,h}\mathcal{M}_{j,t}^{(h)}+\gamma_h\mathcal{Q}_{GDP,t}^{(h)}+u_t^{(h)}
+\label{eq:extended_midas}
+\end{equation}
+这一设定用于检验主模型结果在引入季度总量信息后是否依然稳健。
+
+% 新增图：真实值与预测值对比图（5日窗口）
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/true_pred_5d.png}
+\caption{未来5日累计收益率的真实值与预测值对比}
+\label{fig:true_pred_5d}
+\end{figure}
+
+% 新增图：真实值与预测值对比图（60日窗口）
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/true_pred_60d.png}
+\caption{未来60日累计收益率的真实值与预测值对比}
+\label{fig:true_pred_60d}
+\end{figure}
+
+% 新增图：第一阶段残差诊断图
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/residual_stage1.png}
+\caption{第一阶段 MIDAS 模型残差诊断图}
+\label{fig:residual_stage1}
+\end{figure}
+
+\subsection{第二阶段：异常收益偏离的分组嵌套回归}
+
+第一阶段得到的是给定宏观信息集下未来收益率的条件预期，实际市场收益并不必然完全围绕这一基准运行。尤其在情绪波动、资金快速流动或流动性收缩的情况下，市场表现往往会偏离宏观变量所隐含的收益水平。基于这一考虑，本文在第二阶段转向考察实际收益偏离宏观预期的形成机制。
+
+首先，根据第一阶段的预测值构造异常收益：
+\begin{equation}
+AR_t^{(h)}=R_t^{(h)}-\widehat{R}_t^{(h)},\qquad h\in\{5,60\}
+\label{eq:ar_def}
+\end{equation}
+当 $AR_t^{(h)}>0$ 时，说明实际累计收益高于宏观预期；反之则表明实际收益低于宏观预期。本文进一步定义异常收益绝对值，用以刻画偏离强度：
+\begin{equation}
+AbsAR_t^{(h)}=\left|AR_t^{(h)}\right|
+\label{eq:absar_def}
+\end{equation}
+异常收益绝对值更适合刻画市场异动程度，也更贴近第二阶段关于偏离放大机制的研究目标。因此，主结果部分以 $AbsAR_t^{(5)}$ 和 $AbsAR_t^{(60)}$ 为因变量，补充分析中再讨论 $AR_t^{(5)}$ 和 $AR_t^{(60)}$ 的方向性结果。
+
+在模型设定上，第二阶段采用分组嵌套回归。第一组变量为情绪与风险感知变量，包括情绪标准分和隐含波动率指数。相应回归式写为
+\begin{equation}
+Y_t^{(h)}=\alpha_{0,h}+\alpha_{1,h}sentiment\_zscore_{t-1}+\alpha_{2,h}ivix_{t-1}+\varepsilon_t^{(h,1)}
+\label{eq:model1}
+\end{equation}
+其中 $Y_t^{(h)}$ 表示第二阶段因变量，在主结果中取 $AbsAR_t^{(h)}$，在补充结果中取 $AR_t^{(h)}$。
+
+第二步加入资金与杠杆交易变量，即北向资金净流入和融资融券余额，得到第二个嵌套模型：
+\begin{equation}
+\begin{aligned}
+Y_t^{(h)}=\beta_{0,h}&+\beta_{1,h}sentiment\_zscore_{t-1}+\beta_{2,h}ivix_{t-1}\\
+&+\beta_{3,h}north\_flow_{t-1}+\beta_{4,h}margin\_balance_{t-1}+\varepsilon_t^{(h,2)}
+\end{aligned}
+\label{eq:model2}
+\end{equation}
+
+第三步再纳入流动性与交易状态变量，包括 Amihud 非流动性指标、20日动量和日内振幅，形成完整的嵌套模型：
+\begin{equation}
+\begin{aligned}
+Y_t^{(h)}=\gamma_{0,h}&+\gamma_{1,h}sentiment\_zscore_{t-1}+\gamma_{2,h}ivix_{t-1}\\
+&+\gamma_{3,h}north\_flow_{t-1}+\gamma_{4,h}margin\_balance_{t-1}\\
+&+\gamma_{5,h}amihud_{t-1}+\gamma_{6,h}momentum_{20d,t-1}\\
+&+\gamma_{7,h}intraday\_range_{t-1}+\varepsilon_t^{(h,3)}
+\end{aligned}
+\label{eq:model3}
+\end{equation}
+
+在模型I至模型III之间，本文对新增变量组进行联合显著性检验，并结合调整后 $R^2$ 的变化衡量各组变量的边际贡献。若新增变量组在统计上显著，且模型拟合有明显改善，则说明该组变量对异常收益偏离具有独立解释力。这样得到的增量检验结果，可以补充单纯依赖 $R^2$ 变化所带来的判断局限。
+
+% 图3-6：第二阶段分组嵌套回归结构
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+    node distance=0.3cm and 0.8cm,
+    box/.style={rectangle, rounded corners, draw=green!60, fill=green!5, thick, minimum width=3cm, minimum height=0.6cm, align=center, font=\small},
+    arrow/.style={-{Stealth[length=2mm]}, thick, green!60}
+]
+
+% 模型1
+\node[box] (m1) {模型I：情绪与风险感知\\情绪标准分 + iVIX};
+
+% 模型2
+\node[box, below=0.4cm of m1] (m2) {模型II：加入资金与杠杆\\+ 北向资金 + 融资融券};
+
+% 模型3
+\node[box, below=0.4cm of m2] (m3) {模型III：完整模型\\+ Amihud + 动量 + 振幅};
+
+% 模型4
+\node[box, below=0.4cm of m3] (m4) {综合模型：LASSO筛选\\保留非零系数变量};
+
+% 箭头
+\draw[arrow] (m1) -- (m2);
+\draw[arrow] (m2) -- (m3);
+\draw[arrow] (m3) -- (m4);
+
+% 因变量
+\node[left=1.5cm of m2, align=center, font=\small] (y) {因变量：\\$AbsAR_t^{(5)}$\\$AbsAR_t^{(60)}$};
+\draw[arrow, blue!60] (y) -- (m1);
+\draw[arrow, blue!60] (y) -- (m2);
+\draw[arrow, blue!60] (y) -- (m3);
+
+% 标准误标注
+\node[right=1.5cm of m2, align=center, font=\small] (se) {Newey--West\\HAC标准误};
+\draw[arrow, gray] (m1) -- (se);
+\draw[arrow, gray] (m2) -- (se);
+\draw[arrow, gray] (m3) -- (se);
+\draw[arrow, gray] (m4) -- (se);
+
+\end{tikzpicture}
+\caption{第二阶段分组嵌套回归结构图}
+\label{fig:nested_regression}
+\end{figure}
+
+完整嵌套模型估计完成后，本文再对所有标准化市场状态变量应用 LASSO 回归，通过交叉验证选择惩罚参数 $\lambda$，以识别系数收缩为零的变量。表~\ref{tab:stage2_results}报告了第二阶段分组嵌套回归的估计结果。
+
+% 表3-2：第二阶段分组嵌套回归估计结果
+\begin{table}[htbp]
+\centering
+\caption{第二阶段分组嵌套回归估计结果}
+\label{tab:stage2_results}
+\small
+\begin{tabular}{lcccc}
+\topline
+\textbf{预测窗口} & \textbf{模型} & \textbf{调整后$R^2$} & \textbf{增量解释力} & \textbf{LASSO保留变量} \\
+\midline
+5日 & 模型I（情绪） & 0.0604 & -- & -- \\
+5日 & 模型II（+资金） & 0.0614 & 0.0010 & -- \\
+5日 & 模型III（+流动性） & 0.0630 & 0.0016 & -- \\
+5日 & 综合模型 & 0.0643 & -- & ivix, north\_flow, margin, turnover \\
+\midline
+60日 & 模型I（情绪） & 0.0014 & -- & -- \\
+60日 & 模型II（+资金） & 0.0108 & 0.0094 & -- \\
+60日 & 模型III（+流动性） & 0.0140 & 0.0032 & -- \\
+60日 & 综合模型 & 0.0014 & -- & ivix \\
+\bottomline
+\end{tabular}
+\end{table}
+
+注：增量解释力为相对于前一模型的调整后$R^2$变化。LASSO筛选基于交叉验证选择惩罚参数。
+\begin{equation}
+Y_t^{(h)}=\delta_{0,h}+\sum_{k=1}^{K_h^*}\delta_{k,h}W_{k,t-1}+\varepsilon_t^{(h,4)}
+\label{eq:model4}
+\end{equation}
+其中 $W_{k,t-1}$ 为在完整嵌套模型与 LASSO 筛选程序中同时得到支持的变量集合，$K_h^*$ 为保留变量个数。
+
+第二阶段结果展示包括各模型的系数估计值、t统计量、显著性水平、调整后 $R^2$、新增变量组联合检验结果，以及残差拟合图和残差时间序列图。这样既可以展示变量方向和边际效应，也可以检验模型误差是否存在明显的时段性偏离。
+
+由于未来5日和未来60日累计收益率都采用了重叠窗口构造方式，由此形成的异常收益及其绝对值序列通常存在明显的序列相关。为保证推断结果稳健，第二阶段所有回归均采用OLS估计，并使用 Newey--West HAC 稳健标准误对统计量进行修正。对于5日窗口，HAC 滞后阶数取4；对于60日窗口，滞后阶数取59。
+
+% 新增图：第二阶段残差诊断图
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/residual_stage2.png}
+\caption{第二阶段分组嵌套回归残差诊断图}
+\label{fig:residual_stage2}
+\end{figure}
+
+% 新增图：LASSO交叉验证误差图
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/lasso_cv.png}
+\caption{LASSO 惩罚参数选择结果}
+\label{fig:lasso_cv}
+\end{figure}
+
+% 新增图：LASSO系数路径图
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/lasso_path.png}
+\caption{第二阶段变量的 LASSO 系数路径图}
+\label{fig:lasso_path}
+\end{figure}
+
+% 新增图：分组嵌套回归边际解释力图
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/marginal_r2.png}
+\caption{分组嵌套回归的边际解释力变化}
+\label{fig:marginal_r2}
+\end{figure}
+
+\subsection{样本内与样本外评估}
+
+第一阶段 MIDAS 模型的估计结果，需要同时从样本内拟合能力和样本外预测能力两个层面进行检验。仅凭样本内显著性并不足以说明宏观变量对未来收益率具有稳定预测作用，尤其在金融市场收益预测问题中，模型往往会在样本内表现良好，却在样本外递推中迅速减弱。因此，本文将样本内与样本外评估作为第一阶段实证分析中并行展开的两个部分\cite{campbell2008predicting,welch2008comprehensive}。
+
+在样本内部分，本文首先报告单变量 MIDAS 模型与精简多变量 MIDAS 模型的参数估计结果，包括各变量的系数估计值、t统计量、显著性水平，以及模型的 $R^2$、调整后 $R^2$、AIC 和 BIC。宏观变量在5日与60日收益窗口下的拟合能力将通过表格和图形两种方式同时展示。表格部分用于比较统计指标，图形部分则绘制真实值与两类模型预测值的折线图，展示代表性区间内单变量最优模型、精简多变量模型与真实收益率之间的动态差异。
+
+在样本外部分，本文采用扩展窗口法进行动态递推预测。将样本前60\%的区间设定为初始估计窗口，用于第一次参数估计；随后每向前推进一个预测时点，便将新观测纳入样本，重新估计模型，并生成该时点对应的未来5日或未来60日收益预测值。如此递推，直到覆盖全部样本外区间。设样本外区间记为 $OOS$，则在预测窗口 $h$ 下，样本外均方根误差定义为
+\begin{equation}
+RMSE_h=\sqrt{\frac{1}{T_{OOS}}\sum_{t\in OOS}\left(R_t^{(h)}-\hat{R}_t^{(h)}\right)^2}
+\label{eq:rmse}
+\end{equation}
+平均绝对误差定义为
+\begin{equation}
+MAE_h=\frac{1}{T_{OOS}}\sum_{t\in OOS}\left|R_t^{(h)}-\hat{R}_t^{(h)}\right|
+\label{eq:mae}
+\end{equation}
+进一步地，样本外 $R^2$ 定义为
+\begin{equation}
+R_{OS,h}^{2}=1-\frac{\sum_{t\in OOS}(R_t^{(h)}-\hat{R}_t^{(h)})^2}{\sum_{t\in OOS}(R_t^{(h)}-\bar{R}_h)^2}
+\label{eq:r2os}
+\end{equation}
+其中 $\bar{R}_h$ 表示以样本内历史均值构造的基准预测值。
+
+第二阶段的核心任务在于识别异常收益偏离的形成机制，因此其评估重点放在嵌套模型中各组变量加入后的边际解释力变化。对 $AbsAR_t^{(5)}$、$AbsAR_t^{(60)}$、$AR_t^{(5)}$ 和 $AR_t^{(60)}$，分别报告模型I、模型II、模型III和综合模型的系数估计值、HAC修正后的 t统计量、调整后 $R^2$、新增变量组联合检验统计量，以及残差诊断图。这样既能反映各类变量的独立作用，也能展示完整模型向综合模型收束的过程。
+
+% 表3-2：评价指标说明
+\begin{table}[htbp]
+\centering
+\caption{评价指标说明}
+\label{tab:metrics}
+\begin{tabular}{p{2.5cm}p{8cm}c}
+\topline
+\textbf{指标} & \textbf{计算公式} & \textbf{判断标准} \\
+\midline
+$R^2$/调整$R^2$ & $1-\frac{SSR}{SST}$，考虑自由度修正 & 越大越好 \\
+AIC & $-2\ln(L)+2k$，$k$为参数个数 & 越小越好 \\
+BIC & $-2\ln(L)+k\ln(n)$，含样本量惩罚 & 越小越好 \\
+RMSE & $\sqrt{\frac{1}{T}\sum(y_t-\hat{y}_t)^2}$ & 越小越好 \\
+MAE & $\frac{1}{T}\sum|y_t-\hat{y}_t|$ & 越小越好 \\
+$R^2_{OS}$ & $1-\frac{\sum_{OOS}(y_t-\hat{y}_t)^2}{\sum_{OOS}(y_t-\bar{y})^2}$ & $>0$优于历史均值 \\
+\bottomline
+\end{tabular}
+\end{table}
+
+\subsection{稳健性检验}
+
+为确保实证结论不依赖于某一特定设定，本文从模型形式、滞后结构、变量选择、样本构造和样本区间等多个方面展开稳健性检验。
+
+第一类稳健性检验针对第一阶段 MIDAS 模型中的权重函数设定。主模型采用 Beta 权重函数，以刻画过去12个月宏观信息对未来收益率的动态影响。为检验结果是否过于依赖这一特定函数形式，进一步使用 Exponential Almon 权重函数重新估计单变量和精简多变量 MIDAS 模型。若主要宏观变量的符号、显著性以及样本外预测排序未发生实质变化，则说明结果对权重函数设定具有较好的稳健性。
+
+第二类稳健性检验针对滞后长度设定。主模型统一采用12个月月度滞后窗口。为检验这一设定对结果的影响，进一步将月度变量的滞后长度分别调整为6个月和18个月，并重新估计对应模型。若主要变量在不同滞后长度下依然表现出相近的方向和预测能力，则说明主结果不依赖单一窗口长度。
+
+第三类稳健性检验围绕宏观变量筛选程序展开。主模型中，精简多变量 MIDAS 的解释变量来自单变量表现、VIF 检验和样本外预测结果的联合筛选。稳健性检验中，分别采用更严格的 VIF 阈值、不同的变量保留数量上限，以及加入 GDP 季度加权项的扩展设定进行比较，以检验变量选择规则是否影响主要结论。
+
+第四类稳健性检验围绕收益窗口构造方式展开。由于未来5日和未来60日累计收益率采用重叠窗口构造，相邻观测之间共享部分收益信息。为此，在主结果采用 HAC 标准误修正之外，进一步构造非重叠收益窗口，分别形成5日和60日非重叠收益序列，并在相应样本上重新估计第一阶段和第二阶段模型。若主要结论在非重叠样本下仍保持方向一致，则说明结果不依赖重叠窗口带来的统计特征。
+
+第五类稳健性检验关注样本期间的异质性。考虑到2015年以来中国资本市场经历了多次环境变化，不同时期的宏观变量传导方式、资金结构和交易风格都可能存在差异，本文按年份或相邻年份组合划分子样本，对主要模型分别进行重新估计，并比较不同子区间中的参数方向、显著性及预测能力。
+
+第六类稳健性检验针对第二阶段综合模型的筛选程序。主文中综合模型依据完整嵌套模型中的变量显著性、调整后 $R^2$ 提升幅度以及 LASSO 非零系数结果共同确定。稳健性部分进一步比较不同惩罚参数选择规则、不同显著性门槛以及是否保留边界变量的结果差异，考察最终保留下来的核心变量是否稳定。
