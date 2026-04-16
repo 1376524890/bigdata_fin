@@ -60,40 +60,62 @@ AbsAR_t^{(h)}=\left|AR_t^{(h)}\right|
 
 整个研究的技术路线围绕五个连续环节展开。研究从沪深300指数收盘价出发构造未来5日和60日累计收益率，并按"上一个完整月可得信息"原则将月度宏观变量映射到日度样本。随后完成训练集与测试集划分，在训练集上估计缩尾阈值、标准化参数、VIF 统计和单变量 MIDAS 模型，再将相应规则外推到测试集。基于第一阶段模型输出形成条件预期收益率后，继续构造异常收益与异常收益绝对值，得到市场偏离指标。最后在第二阶段中使用分组嵌套回归、联合显著性检验、LASSO 与 HAC 稳健标准误识别情绪、资金、流动性、政策不确定性与汇率波动对偏离的影响。这一技术路线将宏观信息、收益预期和市场异动纳入同一分析框架。
 
-% 图1-1：研究技术路线图
+% 图1-1：研究总体技术路线图
 \begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
-    node distance=0.8cm and 1.2cm,
-    box/.style={rectangle, rounded corners, draw=blue!60, fill=blue!5, very thick, minimum width=3cm, minimum height=0.8cm, align=center, font=\small},
-    arrow/.style={-{Stealth[length=2mm]}, thick, blue!60}
+    node distance=0.6cm and 0.8cm,
+    box/.style={rectangle, rounded corners, draw=blue!50, fill=blue!3, thick, minimum width=2.8cm, minimum height=0.7cm, align=center, font=\small},
+    boxwide/.style={rectangle, rounded corners, draw=blue!50, fill=blue!3, thick, minimum width=4.5cm, minimum height=0.7cm, align=center, font=\small},
+    arrow/.style={-{Stealth[length=2mm]}, thick, blue!50},
+    note/.style={rectangle, rounded corners, draw=gray!50, fill=gray!5, thick, minimum width=4cm, minimum height=1cm, align=left, font=\scriptsize}
 ]
 
-% 第一行
-\node[box] (macro) {宏观变量输入\\CPI、PPI、M2、EPU、汇率};
+% 模块1：宏观基本面信息集
+\node[box] (m1) {宏观基本面信息集};
+\node[below=0.1cm of m1, font=\scriptsize, text=gray] {CPI、PPI、M2、EPU、USD/CNY};
 
-% 第二行
-\node[box, below=of macro] (midas) {MIDAS混频回归\\条件预期收益};
+% 模块2：第一阶段MIDAS
+\node[box, below=0.6cm of m1] (m2) {第一阶段：MIDAS混频回归};
+\node[below=0.1cm of m2, font=\scriptsize, text=gray] {月度宏观变量 $\times$ 日度收益窗口};
 
-% 第三行
-\node[box, below=of midas] (ar) {异常收益构造\\$AR_t^{(h)}$、$AbsAR_t^{(h)}$};
+% 模块3：条件预期收益率
+\node[box, below=0.6cm of m2] (m3) {条件预期收益率};
+\node[below=0.1cm of m3, font=\scriptsize, text=gray] {未来5日 / 未来60日累计收益率预期};
 
-% 第四行
-\node[box, below=of ar] (reg) {分组嵌套回归\\情绪/资金/流动性};
+% 模块4：实际市场表现
+\node[box, below=0.6cm of m3] (m4) {实际市场表现};
+\node[below=0.1cm of m4, font=\scriptsize, text=gray] {沪深300未来5日 / 60日累计收益率};
 
-% 第五行
-\node[box, below=of reg] (robust) {稳健性检验\\权重/滞后/子样本};
+% 模块5：预期偏离构造
+\node[box, below=0.6cm of m4] (m5) {预期偏离构造};
+\node[below=0.1cm of m5, font=\scriptsize, text=gray] {$AR^{(h)}$、$AbsAR^{(h)}$};
 
-% 箭头
-\draw[arrow] (macro) -- (midas);
-\draw[arrow] (midas) -- (ar);
-\draw[arrow] (ar) -- (reg);
-\draw[arrow] (reg) -- (robust);
+% 模块6：第二阶段偏离成因识别（分两层）
+\node[boxwide, below=0.6cm of m5] (m6title) {第二阶段：偏离成因识别};
+\node[box, below=0.2cm of m6title] (m6a) {模型I--III：情绪/资金/流动性};
+\node[box, below=0.2cm of m6a] (m6b) {扩展模型IV：EPU / $fx\_vol$};
+
+% 箭头连接
+\draw[arrow] (m1) -- (m2);
+\draw[arrow] (m2) -- (m3);
+\draw[arrow] (m3) -- (m4);
+\draw[arrow] (m4) -- (m5);
+\draw[arrow] (m5) -- (m6title);
+
+% 右下角注释框
+\node[note, right=1.5cm of m6b] (notebox) {
+    统计推断：HAC稳健标准误\\
+    模型比较：调整后$R^2$、联合F检验\\
+    \hspace{0.5cm}LASSO筛选
+};
 
 \end{tikzpicture}
-\caption{研究技术路线图}
+\caption{研究总体技术路线图}
 \label{fig:research_framework}
 \end{figure}
+
+\noindent\textbf{图注：}第一阶段使用 MIDAS 构造条件预期收益率；第二阶段先用情绪、资金、流动性变量识别偏离机制，再在扩展模型 IV 中纳入政策不确定性与汇率波动变量，检验政策与外部环境对长期偏离的增量解释力。
 
 \subsection{研究思路与预期贡献}
 

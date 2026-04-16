@@ -16,38 +16,70 @@
 \begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
-    node distance=0.8cm and 1.2cm,
-    box1/.style={rectangle, rounded corners, draw=blue!60, fill=blue!5, thick, minimum width=3cm, minimum height=1cm, align=center, font=\small},
-    box2/.style={rectangle, rounded corners, draw=green!60, fill=green!5, thick, minimum width=3cm, minimum height=1cm, align=center, font=\small},
+    node distance=0.5cm and 0.8cm,
+    box1/.style={rectangle, rounded corners, draw=blue!50, fill=blue!3, thick, minimum width=2.5cm, minimum height=0.6cm, align=center, font=\small},
+    box2/.style={rectangle, rounded corners, draw=green!50, fill=green!3, thick, minimum width=2.5cm, minimum height=0.6cm, align=center, font=\small},
+    box2wide/.style={rectangle, rounded corners, draw=green!50, fill=green!3, thick, minimum width=3.5cm, minimum height=0.6cm, align=center, font=\small},
     arrow/.style={-{Stealth[length=2mm]}, thick},
-    label/.style={font=\small\bfseries}
+    label/.style={font=\small\bfseries},
+    note/.style={rectangle, rounded corners, draw=gray!50, fill=gray!5, thick, minimum width=3.5cm, minimum height=1.2cm, align=left, font=\scriptsize}
 ]
 
 % 阶段标签（左侧）
-\node[label, blue!70] at (-2,0) {第一阶段};
-\node[label, green!70] at (-2,-2.2) {第二阶段};
+\node[label, blue!60] at (-2.5,0.5) {第一阶段};
+\node[label, green!60] at (-2.5,-2.5) {第二阶段};
 
-% 第一阶段
-\node[box1] (macro) {宏观变量};
-\node[box1, right=of macro] (midas) {MIDAS加权};
-\node[box1, right=of midas] (exp) {条件预期收益};
+% 第一阶段：理论预期构造
+\node[box1] (stage1title) {\textbf{第一阶段：理论预期构造}};
+\node[box1, below=0.3cm of stage1title] (macro) {宏观变量};
+\node[below=0.05cm of macro, font=\scriptsize, text=gray] {CPI、PPI、M2、EPU、USD/CNY};
+\node[box1, below=0.4cm of macro] (midas) {MIDAS加权};
+\node[box1, below=0.3cm of midas] (exp) {条件预期收益率};
+\node[below=0.05cm of exp, font=\scriptsize, text=gray] {5日 / 60日窗口};
 
-% 第二阶段
-\node[box2, below=1.5cm of macro] (market) {市场状态变量};
-\node[box2, below=1.5cm of midas] (ar) {异常收益};
-\node[box2, below=1.5cm of exp] (reg) {分组嵌套回归};
+% 中间：异常收益构造
+\node[box2, below=0.8cm of exp] (ar) {异常收益 / 异常收益绝对值};
+\node[below=0.05cm of ar, font=\scriptsize, text=gray] {$AR^{(h)}$, $AbsAR^{(h)}$};
 
-% 箭头
-\draw[arrow, blue!60] (macro) -- (midas);
-\draw[arrow, blue!60] (midas) -- (exp);
-\draw[arrow, blue!60] (exp) -- (ar);
-\draw[arrow, green!60] (market) -- (reg);
-\draw[arrow, green!60] (ar) -- (reg);
+% 中间箭头标注
+\node[right=0.5cm of ar, font=\scriptsize, text=gray] {实际收益率 - 条件预期收益率};
+
+% 第二阶段：偏离识别
+\node[box2wide, below=0.6cm of ar] (stage2title) {\textbf{第二阶段：偏离识别}};
+\node[box2, below=0.2cm of stage2title] (base) {基础嵌套模型};
+\node[below=0.05cm of base, font=\scriptsize, text=gray, align=left] {
+    模型I：情绪与风险感知\\
+    模型II：+资金与杠杆\\
+    模型III：+流动性与交易状态
+};
+\node[box2, below=0.6cm of base] (ext4) {扩展模型IV};
+\node[below=0.05cm of ext4, font=\scriptsize, text=gray, align=left] {
+    + 政策不确定性(EPU)\\
+    + 汇率波动($fx\_vol$)
+};
+
+% 右下角输出结果框
+\node[note, right=1cm of ext4] (output) {
+    \textbf{输出结果：}\\
+    调整后$R^2$\\
+    联合F检验\\
+    LASSO筛选\\
+    HAC稳健标准误
+};
+
+% 箭头连接
+\draw[arrow, blue!50] (macro) -- (midas);
+\draw[arrow, blue!50] (midas) -- (exp);
+\draw[arrow, blue!50] (exp) -- (ar);
+\draw[arrow, green!50] (ar) -- (stage2title);
+\draw[arrow, green!50] (base) -- (ext4);
 
 \end{tikzpicture}
 \caption{研究设计总体框架图}
 \label{fig:design_overview}
 \end{figure}
+
+\noindent\textbf{图注：}第二阶段除分组嵌套回归外，进一步构造扩展模型 IV，将经济政策不确定性与汇率波动变量纳入偏离识别框架。
 
 \subsection{变量定义与数据处理}
 
@@ -255,49 +287,64 @@ Y_t^{(h)}=\gamma_{0,h}&+\gamma_{1,h}sentiment\_zscore_{t-1}+\gamma_{2,h}ivix_{t-
 
 在模型I至模型III之间，本文对新增变量组进行联合显著性检验，并结合调整后 $R^2$ 的变化衡量各组变量的边际贡献。若新增变量组在统计上显著，且模型拟合有明显改善，则说明该组变量对异常收益偏离具有独立解释力。
 
-% 图3-6：第二阶段分组嵌套回归结构
+% 图3-6：第二阶段偏离识别模型结构图
 \begin{figure}[htbp]
 \centering
 \begin{tikzpicture}[
-    node distance=0.3cm and 0.8cm,
-    box/.style={rectangle, rounded corners, draw=green!60, fill=green!5, thick, minimum width=3cm, minimum height=0.6cm, align=center, font=\small},
-    arrow/.style={-{Stealth[length=2mm]}, thick, green!60}
+    node distance=0.15cm and 0.25cm,
+    box/.style={rectangle, rounded corners, draw=gray!70, fill=gray!5, thick, minimum width=2.2cm, minimum height=1.0cm, align=center, font=\scriptsize},
+    startbox/.style={rectangle, rounded corners, draw=blue!50, fill=blue!5, thick, minimum width=1.6cm, minimum height=0.9cm, align=center, font=\scriptsize},
+    endbox/.style={rectangle, rounded corners, draw=green!50, fill=green!5, thick, minimum width=2.0cm, minimum height=0.9cm, align=center, font=\scriptsize},
+    notebox/.style={rectangle, rounded corners, draw=gray!50, fill=gray!10, thick, minimum width=3.2cm, minimum height=1.5cm, align=left, font=\tiny},
+    arrow/.style={-{Stealth[length=1.5mm]}, thick, gray!60}
 ]
 
-% 模型1
-\node[box] (m1) {模型I：情绪与风险感知\\情绪标准分 + iVIX};
+% 左侧起点框：因变量
+\node[startbox] (y) {\textbf{因变量}\\[-2pt]\tiny AbsAR(5)、AbsAR(60)\\[-2pt]\tiny 补充：AR(5)、AR(60)};
 
-% 模型2
-\node[box, below=0.4cm of m1] (m2) {模型II：加入资金与杠杆\\+ 北向资金 + 融资融券};
+% 箭头指向模型I
+\node[box, right=0.3cm of y] (m1) {\textbf{模型I}\\[-2pt]\tiny 情绪与风险感知\\[-2pt]\tiny sentiment\_zscore\\[-2pt]\tiny iVIX};
 
-% 模型3
-\node[box, below=0.4cm of m2] (m3) {模型III：完整模型\\+ Amihud + 动量 + 振幅};
+% 模型II
+\node[box, right=0.25cm of m1] (m2) {\textbf{模型II}\\[-2pt]\tiny 资金与杠杆\\[-2pt]\tiny north\_flow\\[-2pt]\tiny margin\_balance};
 
-% 模型4
-\node[box, below=0.4cm of m3] (m4) {综合模型：LASSO筛选\\保留非零系数变量};
+% 模型III
+\node[box, right=0.25cm of m2] (m3) {\textbf{模型III}\\[-2pt]\tiny 流动性与\\[-2pt]\tiny 交易状态\\[-2pt]\tiny amihud、momentum\\[-2pt]\tiny intraday\_range};
 
-% 箭头
+% 模型IV
+\node[box, right=0.25cm of m3] (m4) {\textbf{模型IV}\\[-2pt]\tiny 政策与外部\\[-2pt]\tiny 环境\\[-2pt]\tiny EPU、fx\_vol};
+
+% 箭头连接
+\draw[arrow] (y) -- (m1);
 \draw[arrow] (m1) -- (m2);
 \draw[arrow] (m2) -- (m3);
 \draw[arrow] (m3) -- (m4);
 
-% 因变量
-\node[left=1.5cm of m2, align=center, font=\small] (y) {因变量：\\$AbsAR_t^{(5)}$\\$AbsAR_t^{(60)}$};
-\draw[arrow, blue!60] (y) -- (m1);
-\draw[arrow, blue!60] (y) -- (m2);
-\draw[arrow, blue!60] (y) -- (m3);
+% 分支：上支到解释性结果
+\node[endbox, above right=0.35cm and 0.3cm of m4] (explain) {\textbf{解释性结果}\\[-2pt]\tiny 调整后R²\\[-2pt]\tiny 联合F检验\\[-2pt]\tiny HAC稳健标准误};
 
-% 标准误标注
-\node[right=1.5cm of m2, align=center, font=\small] (se) {Newey--West\\HAC标准误};
-\draw[arrow, gray] (m1) -- (se);
-\draw[arrow, gray] (m2) -- (se);
-\draw[arrow, gray] (m3) -- (se);
-\draw[arrow, gray] (m4) -- (se);
+% 分支：下支到LASSO
+\node[endbox, below right=0.35cm and 0.3cm of m4] (lasso) {\textbf{LASSO筛选}\\[-2pt]\tiny 交叉验证\\[-2pt]\tiny 选择惩罚参数\\[-2pt]\tiny 变量保留结果};
+
+% 箭头分支
+\draw[arrow] (m4.north east) -- (explain.west);
+\draw[arrow] (m4.south east) -- (lasso.west);
+
+% 右下角注释框
+\node[notebox, below=0.2cm of lasso] (note) {
+    \textbf{说明：}\\[1pt]
+    模型I—IV比较新增变量组\\[-2pt]
+    的边际解释力；\\[1pt]
+    LASSO提供稀疏筛选参照，\\[-2pt]
+    两者不合并为同一结论。
+};
 
 \end{tikzpicture}
-\caption{第二阶段分组嵌套回归结构图}
+\caption{第二阶段偏离识别模型结构图}
 \label{fig:nested_regression}
 \end{figure}
+
+\noindent\textbf{图注：}第二阶段先依次估计情绪与风险感知、资金与杠杆、流动性与交易状态三组嵌套模型，再在扩展模型IV中加入EPU与汇率波动代理变量$fx\_vol$，并辅以LASSO作为稀疏筛选参照。所有回归均采用HAC稳健标准误。
 
 完整嵌套模型估计完成后，本文再对所有标准化市场状态变量应用 LASSO 回归，通过交叉验证选择惩罚参数 $\lambda$，以识别系数收缩为零的变量。综合模型写作：
 \begin{equation}
