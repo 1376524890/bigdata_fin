@@ -32,19 +32,6 @@ Ivo Welch and Amit Goyal.
 \newblock \emph{广东财经大学学报}, 39\penalty0 (2):\penalty0 11--28,
   2024.
 
-\bibitem[杨何灿 et~al.(2023)杨何灿, 吴隽豪, and
-  杨咸月]{yang2023northbound}
-杨何灿, 吴隽豪, and 杨咸月.
-\newblock
-  北向资金与境内股票市场流动性——基于高频数据的传导机制.
-\newblock \emph{经济研究}, 58\penalty0 (5):\penalty0 190--208, 2023.
-
-\bibitem[He et~al.(2024)He, Li, Tan, and Wang]{he2024timevarying}
-Y~He, W~Li, X~Tan, and Y~Wang.
-\newblock The time-varying interaction of northbound capital flows and stock
-  market performance in china.
-\newblock \emph{Finance Research Letters}, 69:\penalty0 106076, 2024.
-
 \bibitem[Ghysels et~al.(2004)Ghysels, Santa-Clara, and
   Valkanov]{ghysels2004midas}
 Eric Ghysels, Pedro Santa-Clara, and Rossen Valkanov.
@@ -100,5 +87,18 @@ Yakov Amihud.
 \newblock Illiquidity and stock returns: Cross-section and time-series effects.
 \newblock \emph{Journal of Financial Markets}, 5\penalty0 (1):\penalty0 31--56,
   2002.
+
+\bibitem[杨何灿 et~al.(2023)杨何灿, 吴隽豪, and
+  杨咸月]{yang2023northbound}
+杨何灿, 吴隽豪, and 杨咸月.
+\newblock
+  北向资金与境内股票市场流动性——基于高频数据的传导机制.
+\newblock \emph{经济研究}, 58\penalty0 (5):\penalty0 190--208, 2023.
+
+\bibitem[He et~al.(2024)He, Li, Tan, and Wang]{he2024timevarying}
+Y~He, W~Li, X~Tan, and Y~Wang.
+\newblock The time-varying interaction of northbound capital flows and stock
+  market performance in china.
+\newblock \emph{Finance Research Letters}, 69:\penalty0 106076, 2024.
 
 \end{thebibliography}

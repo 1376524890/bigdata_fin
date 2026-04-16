@@ -1,0 +1,270 @@
+% 第四章 模型结果求解
+
+\section{模型结果求解}
+
+\subsection{第一阶段 MIDAS 结果}
+
+第一阶段 MIDAS 结果需要同时区分样本内显著性与样本外预测能力。样本内部分，多数宏观变量在5日与60日窗口下都呈现统计显著，但这并不等于具有稳定的样本外预测价值。样本外部分，5日窗口中PPI对应的单变量模型表现最好，但$R^2_{OS}$仅为0.0038；60日窗口最优单变量模型的样本外$R^2_{OS}$为负，说明其预测效果不及历史均值。这意味着，第一阶段更适合被解释为"条件预期收益率的构造工具"，而不宜被包装为"具有较强样本外预测能力的收益率预测模型"。5日窗口下，PPI对未来收益存在极弱的样本外增量信息，但经济意义有限；60日窗口下，虽然部分宏观变量在样本内显著，但样本外预测失败，说明长窗口预测更容易受到结构变化与参数不稳定影响；精简多变量模型在实证上未能真正成立，这削弱了"多宏观变量联合预测"的表述强度。
+
+% 表4-1：单变量MIDAS模型系数估计
+\begin{table}[htbp]
+\centering
+\caption{单变量 MIDAS 模型系数估计}
+\label{tab:midas_coef}
+\small
+\begin{tabular}{llccc}
+\topline
+\textbf{预测窗口} & \textbf{变量} & \textbf{系数} & \textbf{t统计量} & \textbf{显著性} \\
+\midline
+\multirow{5}{*}{5日} & CPI & 0.0037 & 4.16 & $^{***}$ \\
+ & PPI & -0.0006 & -2.43 & $^{**}$ \\
+ & M2增速 & 0.0002 & 0.34 &  \\
+ & EPU & 0.00001 & 2.97 & $^{***}$ \\
+ & USD/CNY & 0.0002 & 4.54 & $^{***}$ \\
+\midline
+\multirow{5}{*}{60日} & CPI & 0.0510 & 19.46 & $^{***}$ \\
+ & PPI & -0.0087 & -11.42 & $^{***}$ \\
+ & M2增速 & 0.0010 & 0.52 &  \\
+ & EPU & 0.0001 & 9.69 & $^{***}$ \\
+ & USD/CNY & 0.0024 & 18.03 & $^{***}$ \\
+\bottomline
+\end{tabular}
+\end{table}
+
+注：系数为MIDAS加权项的回归系数。$^{***}$、$^{**}$、$^{*}$分别表示在1\%、5\%、10\%水平显著。
+
+% 表4-2：第一阶段MIDAS模型估计结果
+\begin{table}[htbp]
+\centering
+\caption{第一阶段 MIDAS 模型估计结果}
+\label{tab:midas_results}
+\small
+\begin{tabular}{lcccc}
+\topline
+\textbf{模型} & \textbf{预测窗口} & \textbf{样本内$R^2$} & \textbf{样本外$R^2_{OS}$} & \textbf{RMSE} \\
+\midline
+单变量（PPI） & 5日 & 0.0045 & 0.0038 & 0.0266 \\
+单变量（EPU） & 60日 & 0.0665 & -0.0111 & 0.0842 \\
+\bottomline
+\end{tabular}
+\end{table}
+
+% 图4-1：未来5日累计收益率真实值与预测值对比
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/true_pred_5d.png}
+\caption{未来5日累计收益率真实值与预测值对比}
+\label{fig:true_pred_5d}
+\end{figure}
+
+% 图4-2：未来60日累计收益率真实值与预测值对比
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/true_pred_60d.png}
+\caption{未来60日累计收益率真实值与预测值对比}
+\label{fig:true_pred_60d}
+\end{figure}
+
+% 图4-3：第一阶段残差诊断图
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/residual_stage1.png}
+\caption{第一阶段 MIDAS 模型残差诊断图}
+\label{fig:residual_stage1}
+\end{figure}
+
+\subsection{第二阶段异常收益偏离结果}
+
+第二阶段结果显示，短窗口与长窗口的偏离机制并不相同。5日窗口下，模型I的调整后$R^2$已达到0.0655，说明情绪与风险感知变量对短期偏离具有较强解释力；逐步纳入资金、流动性和交易状态变量后，模型III与模型IV的调整后$R^2$分别达到0.0849与0.0863。LASSO最终保留iVIX、融资融券余额和日内振幅，说明短期偏离主要与风险情绪和交易状态有关。
+
+60日窗口下，模型I的调整后$R^2$仅为0.0037，单独依靠情绪变量难以解释长期偏离；模型II加入资金与杠杆变量后，调整后$R^2$升至0.0210，模型III进一步升至0.0274，说明资金组和流动性组在嵌套回归中具有统计意义上的增量解释力。扩展模型IV加入政策不确定性与汇率波动变量后，调整后$R^2$显著提升至0.0903。LASSO在60日窗口下仅保留iVIX，表明长期偏离的稀疏筛选结果与嵌套回归的解释性发现存在差异。这反映了长窗口偏离机制对模型设定较为敏感，嵌套回归关注增量解释力，而LASSO关注稀疏保留，两种口径并不冲突。
+
+% 表4-3：第二阶段分组嵌套回归估计结果
+\begin{table}[htbp]
+\centering
+\caption{第二阶段分组嵌套回归估计结果}
+\label{tab:stage2_results}
+\small
+\begin{tabular}{lcccccc}
+\topline
+\textbf{预测窗口} & \textbf{模型} & \textbf{调整后$R^2$} & \textbf{增量解释力} & \textbf{联合检验F} & \textbf{联合检验p值} & \textbf{LASSO保留变量} \\
+\midline
+5日 & 模型I（情绪） & 0.0655 & — & — & — & — \\
+5日 & 模型II（+资金） & 0.0664 & 0.0009 & 1.64 & 0.194 & — \\
+5日 & 模型III（+流动性） & 0.0849 & 0.0185 & 17.05 & 0.000$^{***}$ & — \\
+5日 & 模型IV（+EPU+FX） & 0.0863 & 0.0014 & 2.04 & 0.131 & — \\
+5日 & 综合模型 & 0.0863 & — & — & — & ivix, sentiment, momentum\_20d, intraday\_range, epu \\
+\midline
+60日 & 模型I（情绪） & 0.0037 & — & — & — & — \\
+60日 & 模型II（+资金） & 0.0210 & 0.0173 & 12.68 & 0.000$^{***}$ & — \\
+60日 & 模型III（+流动性） & 0.0274 & 0.0064 & 5.21 & 0.001$^{***}$ & — \\
+60日 & 模型IV（+EPU+FX） & 0.0903 & 0.0629 & 46.37 & 0.000$^{***}$ & — \\
+60日 & 综合模型 & 0.0903 & — & — & — & — \\
+\bottomline
+\end{tabular}
+\end{table}
+
+注：增量解释力为相对于前一模型的调整后$R^2$变化。$^{***}$、$^{**}$、$^{*}$分别表示在1\%、5\%、10\%水平显著。模型IV在模型III基础上加入EPU与汇率波动代理变量fx\_vol。
+
+% 表4-4：第二阶段完整嵌套模型核心变量系数估计
+\begin{table}[htbp]
+\centering
+\caption{第二阶段完整嵌套模型（模型III）核心变量系数估计}
+\label{tab:stage2_coef_full}
+\small
+\begin{tabular}{llccc}
+\topline
+\textbf{预测窗口} & \textbf{变量} & \textbf{系数} & \textbf{t统计量} & \textbf{显著性} \\
+\midline
+\multirow{7}{*}{5日（模型III）} & sentiment\_zscore & 0.0003 & 0.52 &  \\
+ & ivix & 0.0046 & 5.06 & $^{***}$ \\
+ & north\_flow & 0.0000 & 0.01 &  \\
+ & margin\_balance & -0.0009 & -1.52 &  \\
+ & amihud & -0.0010 & -1.15 &  \\
+ & momentum\_20d & 0.0001 & 0.23 &  \\
+ & intraday\_range & 0.0022 & 2.48 & $^{**}$ \\
+\midline
+\multirow{7}{*}{60日（模型III）} & sentiment\_zscore & -0.0010 & -0.18 &  \\
+ & ivix & -0.0008 & -0.13 &  \\
+ & north\_flow & 0.0066 & 3.29 & $^{***}$ \\
+ & margin\_balance & -0.0020 & -0.30 &  \\
+ & amihud & 0.0049 & 1.02 &  \\
+ & momentum\_20d & -0.0008 & -0.14 &  \\
+ & intraday\_range & -0.0060 & -1.34 &  \\
+\bottomline
+\end{tabular}
+\end{table}
+
+注：系数估计基于完整嵌套模型（模型III），包含全部七个解释变量，使用HAC稳健标准误。sentiment\_zscore为情绪标准分，momentum\_20d为20日动量。5日窗口下，iVIX的系数显著为正，日内振幅也显著为正，说明短期偏离主要集中在风险感知抬升与交易波动扩张阶段；60日窗口下，北向资金在完整模型中显著，但该结果未被LASSO稳定保留，说明其解释力可能依赖具体模型设定；综合模型更接近"稀疏预测口径"，模型III更接近"解释性回归口径"，两者应并列报告，不宜将综合模型单独写成唯一主结论。
+
+\subsubsection{扩展模型IV：政策不确定性与汇率波动的影响}
+
+为与研究目标中"政策不确定性、汇率波动及隐含波动率等变量进入偏离项回归模型"的要求对齐，本文在模型III基础上进一步加入经济政策不确定性指数（EPU）与汇率波动代理变量（fx\_vol），形成扩展模型IV。汇率波动代理变量采用美元兑人民币汇率变动率的20日滚动波动率构造，并按训练集均值与标准差标准化处理。
+
+% 表4-5：扩展模型IV系数估计
+\begin{table}[htbp]
+\centering
+\caption{扩展模型IV系数估计（加入EPU与FX波动）}
+\label{tab:model4_coef}
+\small
+\begin{tabular}{llccc}
+\topline
+\textbf{预测窗口} & \textbf{变量} & \textbf{系数} & \textbf{t统计量} & \textbf{显著性} \\
+\midline
+\multirow{9}{*}{5日（模型IV）} & sentiment\_zscore & 0.0013 & 2.17 & $^{**}$ \\
+ & ivix & 0.0043 & 4.03 & $^{***}$ \\
+ & north\_flow & -0.0005 & -0.89 &  \\
+ & margin\_balance & -0.0006 & -1.08 &  \\
+ & amihud & -0.0002 & -0.21 &  \\
+ & momentum\_20d & 0.0343 & 2.38 & $^{**}$ \\
+ & intraday\_range & 0.0019 & 2.18 & $^{**}$ \\
+ & epu & 0.0008 & 0.97 &  \\
+ & fx\_vol & -0.0005 & -0.78 &  \\
+\midline
+\multirow{9}{*}{60日（模型IV）} & sentiment\_zscore & -0.0007 & -0.55 &  \\
+ & ivix & -0.0089 & -1.08 &  \\
+ & north\_flow & 0.0052 & 2.37 & $^{**}$ \\
+ & margin\_balance & -0.0006 & -0.10 &  \\
+ & amihud & 0.0046 & 1.32 &  \\
+ & momentum\_20d & 0.0643 & 0.63 &  \\
+ & intraday\_range & -0.0045 & -1.31 &  \\
+ & epu & 0.0091 & 1.20 &  \\
+ & fx\_vol & 0.0127 & 1.77 & $^{*}$ \\
+\bottomline
+\end{tabular}
+\end{table}
+
+注：系数估计基于扩展模型IV，在模型III基础上加入EPU与汇率波动代理变量fx\_vol，使用HAC稳健标准误。$^{***}$、$^{**}$、$^{*}$分别表示在1\%、5\%、10\%水平显著。
+
+% 表4-6：模型III与模型IV增量解释力对比
+\begin{table}[htbp]
+\centering
+\caption{模型III与模型IV增量解释力对比}
+\label{tab:model3_vs_model4}
+\small
+\begin{tabular}{lcccccc}
+\topline
+\textbf{预测窗口} & \textbf{模型} & \textbf{调整后$R^2$} & \textbf{增量解释力} & \textbf{新增变量联合F} & \textbf{联合检验p值} & \textbf{显著性} \\
+\midline
+5日 & 模型III & 0.0849 & — & — & — & — \\
+5日 & 模型IV & 0.0863 & 0.0014 & 2.04 & 0.131 &  \\
+\midline
+60日 & 模型III & 0.0274 & — & — & — & — \\
+60日 & 模型IV & 0.0903 & 0.0629 & 46.37 & 0.000 & $^{***}$ \\
+\bottomline
+\end{tabular}
+\end{table}
+
+注：模型IV在模型III基础上加入EPU与汇率波动代理变量fx\_vol。新增变量联合F检验检验EPU与fx\_vol的整体显著性。扩展模型IV结果表明，5日窗口下模型IV调整后$R^2$为0.0863，相较于模型III仅提升0.0014，新增变量联合F检验为2.04（$p=0.131$），说明政策不确定性与汇率波动对短期偏离的解释力增量不明显；60日窗口下模型IV调整后$R^2$达到0.0903，相较于模型III提升0.0629，新增变量联合F检验为46.37（$p<0.001$），说明政策不确定性与汇率波动对长期偏离具有显著的解释力增量；60日窗口中汇率波动代理变量（fx\_vol）系数为0.0127，t统计量为1.77，在10\%水平显著，说明汇率波动上升会放大长期偏离幅度；从研究目标对齐角度看，扩展模型IV已将政策与外部环境变量正式纳入偏离识别框架，实证结果表明这类变量在长期偏离解释中具有不可忽视的作用。
+
+% 图4-4：第二阶段残差诊断图
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/residual_stage2.png}
+\caption{第二阶段分组嵌套回归残差诊断图}
+\label{fig:residual_stage2}
+\end{figure}
+
+% 图4-5：LASSO惩罚参数选择结果
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/lasso_cv.png}
+\caption{LASSO惩罚参数选择结果}
+\label{fig:lasso_cv}
+\end{figure}
+
+% 图4-6：LASSO系数路径图（扩展版，含EPU和fx_vol）
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/lasso_path_extended.png}
+\caption{第二阶段变量的LASSO系数路径图（含扩展变量）}
+\label{fig:lasso_path}
+\end{figure}
+
+\subsection{模型评价与结果综合判断}
+
+本文对第一阶段与第二阶段结果的评价分别采用不同口径。第一阶段关注样本内拟合与样本外预测表现，主要使用 $R^2$、调整后 $R^2$、RMSE、MAE 与样本外 $R^2_{OS}$ 判断宏观变量构造条件预期收益率的效果。第二阶段关注偏离识别的解释力，核心指标为调整后 $R^2$、新增变量组联合显著性检验以及 HAC 修正后的系数显著性。这样的区分对应了两阶段模型承担的不同任务：前者用于形成理论预期基准，后者用于解释市场围绕该基准发生偏离的原因。
+
+从第一阶段看，样本内显著性与样本外预测能力明显分离。宏观变量可以进入条件预期，却不足以提供强样本外预测增益。第一阶段的核心用途因此更偏向"形成理论预期收益率基准"，而非"单独做收益预测"。
+
+从第二阶段看，短窗口偏离解释更稳定，长窗口偏离解释更敏感。5日窗口下，情绪、iVIX、动量和日内振幅的作用较集中；60日窗口下，资金变量与汇率波动变量在嵌套回归中有效，说明长期偏离机制受到更多结构性因素与外部环境影响。
+
+扩展模型IV的结果表明，政策不确定性与汇率波动对60日窗口偏离的解释力增量非常显著（调整后$R^2$从0.0274提升至0.0903，联合F检验达46.37），但对5日窗口的影响有限（增量仅0.0014）。这说明政策与外部环境变量主要作用于中长期偏离，而非短期波动放大机制。
+
+从研究目标对齐角度看，本文已完成"宏观基本面—理论预期收益率—实际市场表现—预期偏离—偏离成因识别"的主链条。宏观变量塑造条件信息集，情绪与交易状态推动短期偏离，政策不确定性与汇率波动解释长期偏离。
+
+% 表4-5：评价指标说明
+\begin{table}[htbp]
+\centering
+\caption{评价指标说明}
+\label{tab:metrics}
+\small
+\begin{tabular}{lp{6cm}c}
+\topline
+\textbf{指标} & \textbf{计算公式/含义} & \textbf{判断标准} \\
+\midline
+$R^2$/调整后$R^2$ & 拟合优度与自由度修正 & 越大越好 \\
+AIC & 信息准则，考虑参数个数 & 越小越好 \\
+BIC & 信息准则，包含样本量惩罚 & 越小越好 \\
+RMSE & 均方根误差 & 越小越好 \\
+MAE & 平均绝对误差 & 越小越好 \\
+$R^2_{OS}$ & 相对历史均值基准的样本外改进 & 大于0较好 \\
+\bottomline
+\end{tabular}
+\end{table}
+
+% 图4-7：分组嵌套回归边际解释力变化（含扩展模型IV）
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/marginal_r2_extended.png}
+\caption{分组嵌套回归的边际解释力变化（含扩展模型IV）}
+\label{fig:marginal_r2}
+\end{figure}
+
+% 图4-8：扩展模型IV解释力变化图
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.9\textwidth]{figures/model4_r2_comparison.png}
+\caption{扩展模型IV与主模型的解释力比较}
+\label{fig:model4_comparison}
+\end{figure}
