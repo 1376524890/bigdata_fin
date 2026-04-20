@@ -1,0 +1,5 @@
+Target,Window,LASSO_Alpha_Base,LASSO_Selected_Base,LASSO_Alpha_Ext,LASSO_Selected_Ext
+AbsAR,5d,0.00040378740868648506,"ivix_z_lag1, north_flow_z_lag1, momentum_20d_z_lag1, intraday_range_z_lag1",0.0003765734887703185,"ivix_z_lag1, north_flow_z_lag1, momentum_20d_z_lag1, intraday_range_z_lag1, epu_z_lag1, fx_vol_z_lag1"
+AbsAR,60d,0.006350936525130742,,0.01340175177414555,
+AR,5d,0.0019381413363510822,,0.0010343277379674,"ivix_z_lag1, margin_balance_z_lag1, momentum_20d_z_lag1, epu_z_lag1"
+AR,60d,0.01968667620702416,,0.0031270733112555,"ivix_z_lag1, north_flow_z_lag1, margin_balance_z_lag1, momentum_20d_z_lag1, intraday_range_z_lag1, epu_z_lag1, fx_vol_z_lag1"

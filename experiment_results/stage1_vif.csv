@@ -1,0 +1,11 @@
+Window,Variable,VIF
+5d,cpi,
+5d,ppi,
+5d,m2_growth,
+5d,epu,
+5d,usd_cny,
+60d,cpi,
+60d,ppi,
+60d,m2_growth,
+60d,epu,
+60d,usd_cny,
