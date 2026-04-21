@@ -90,29 +90,36 @@ experiment_pipeline/
 #### 第二阶段: 分组嵌套回归
 
 1. **模型I: 情绪与风险感知**
-   - 变量: iVIX
+   - 变量: `sentiment_zscore`（情绪标准分）、`iVIX`（隐含波动率指数）
    - 方法: OLS with HAC稳健标准误
 
 2. **模型II: 加入资金与杠杆交易**
-   - 新增变量: 北向资金净流入、融资融券余额
+   - 新增变量: `north_flow`（北向资金净流入）、`margin_balance`（融资融券余额）
    - 联合显著性检验（F检验）
 
-3. **模型III: 完整模型**
-   - 新增变量: Amihud非流动性、日内振幅
+3. **模型III: 加入流动性与交易状态**
+   - 新增变量: `amihud`（Amihud非流动性指标）、`momentum_20d`（20日动量）、`intraday_range`（日内振幅）
    - 联合显著性检验
 
-4. **LASSO变量筛选**
+4. **模型IV: 扩展模型（政策与外部环境）**
+   - 新增变量: `epu`（经济政策不确定性指数）、`fx_vol`（汇率波动代理变量）
+   - 检验政策不确定性与汇率波动对长期偏离的增量解释力
+
+5. **LASSO变量筛选**
    - 5折交叉验证选择最优惩罚参数λ
    - 识别保留的非零系数变量
-
-5. **综合模型**
-   - 基于LASSO结果的最终模型
-   - 计算调整后R²
+   - 基础变量集（模型I-III变量）和扩展变量集（含模型IV变量）分别运行
 
 **输出**:
-- `stage1_results.csv` - 第一阶段结果
-- `stage2_results.csv` - 第二阶段结果
-- `full_data_with_predictions.csv` - 含预测值的完整数据
+- `stage1_summary.csv` - 第一阶段模型汇总结果（样本内/外R²、最优变量等）
+- `stage1_vif.csv` - VIF多重共线性检验结果
+- `stage1_coefficients.csv` - 第一阶段MIDAS模型系数详细估计结果
+- `stage2_absar_summary.csv` - 第二阶段异常收益绝对值(AbsAR)分组嵌套回归汇总
+- `stage2_absar_coefficients.csv` - 第二阶段AbsAR模型系数详细估计
+- `stage2_ar_summary.csv` - 第二阶段异常收益(AR)分组嵌套回归汇总  
+- `stage2_ar_coefficients.csv` - 第二阶段AR模型系数详细估计
+- `lasso_summary.csv` - LASSO变量筛选结果汇总
+- `full_data_with_predictions.csv` - 含预测值的完整数据集
 
 ---
 
@@ -212,11 +219,12 @@ pip install pandas numpy matplotlib scikit-learn statsmodels akshare yfinance
 │    └─ 精简多变量模型                                                     │
 │                                                                          │
 │  第二阶段: 分组嵌套回归                                                   │
-│    ├─ 模型I: 情绪与风险感知 (iVIX)                                       │
-│    ├─ 模型II: +资金与杠杆 (北向、融资)                                   │
-│    ├─ 模型III: +流动性 (Amihud、日内振幅)                                │
-│    ├─ LASSO变量筛选                                                      │
-│    └─ 综合模型                                                           │
+│    ├─ 模型I: 情绪与风险感知 (sentiment_zscore, iVIX)                     │
+│    ├─ 模型II: +资金与杠杆 (北向资金、融资融券)                           │
+│    ├─ 模型III: +流动性与交易状态 (Amihud、动量、日内振幅)                │
+│    ├─ 模型IV: +政策与外部环境 (EPU、汇率波动)                            │
+│    ├─ LASSO变量筛选（基础集/扩展集）                                     │
+│    └─ HAC稳健标准误推断                                                  │
 └─────────────────────────────────────────────────────────────────────────┘
                                     ↓
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -234,7 +242,8 @@ pip install pandas numpy matplotlib scikit-learn statsmodels akshare yfinance
 
 ### 被解释变量
 - `R_5d` / `R_60d`: 未来5日/60日累计收益率
-- `AbsAR_5d` / `AbsAR_60d`: 异常收益绝对值（衡量预测偏离程度）
+- `AbsAR_5d` / `AbsAR_60d`: 异常收益绝对值（衡量偏离强度，第二阶段主结果）
+- `AR_5d` / `AR_60d`: 异常收益（带方向，第二阶段补充结果）
 
 ### 宏观变量 (月度)
 - `cpi`: CPI同比增速
@@ -244,12 +253,14 @@ pip install pandas numpy matplotlib scikit-learn statsmodels akshare yfinance
 - `usd_cny`: 美元兑人民币汇率
 
 ### 市场状态变量 (日度)
+- `sentiment_zscore`: 情绪标准分
 - `ivix`: 中国波指（隐含波动率指数）
 - `north_flow`: 北向资金净流入
 - `margin_balance`: 融资融券余额
 - `amihud`: Amihud非流动性指标
-- `intraday_range`: 日内振幅
-- `sentiment_zscore`: 情绪标准分
+- `momentum_20d`: 20日价格动量
+- `intraday_range`: 日内振幅（(high-low)/open）
+- `fx_vol`: 汇率波动代理变量（USD/CNY 20日滚动波动率）
 
 ---
 

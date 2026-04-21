@@ -351,7 +351,7 @@ Y_t^{(h)}=\gamma_{0,h}&+\gamma_{1,h}sentiment\_zscore_{t-1}+\gamma_{2,h}ivix_{t-
 Y_t^{(h)}=\delta_{0,h}+\sum_{k=1}^{K_h^*}\delta_{k,h}W_{k,t-1}+\varepsilon_t^{(h,4)}
 \label{eq:model4}
 \end{equation}
-其中 $W_{k,t-1}$ 为在完整嵌套模型与 LASSO 筛选程序中同时得到支持的变量集合，$K_h^*$ 为保留变量个数。
+其中 $W_{k,t-1}$ 为 LASSO 在标准化变量集合上筛选得到的非零系数变量集合，$K_h^*$ 为保留变量个数。该结果作为稀疏筛选参照，不与嵌套回归的组增量检验合并为同一结论。
 
 为识别政策不确定性与外部环境变量对市场偏离的额外解释作用，本文在模型 III 基础上构造扩展模型 IV：
 \begin{equation}
