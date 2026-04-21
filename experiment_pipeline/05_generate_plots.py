@@ -137,8 +137,16 @@ def plot_lasso_cv(df):
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
     for i, h in enumerate([5, 60]):
-        y_train = df_train[f'AbsAR_{h}d'].values
-        X_train = df_train[stage2_vars].values
+        y_col = f'AbsAR_{h}d'
+        # 删除缺失值
+        df_clean = df_train.dropna(subset=[y_col] + stage2_vars)
+
+        if len(df_clean) < 20:
+            print(f"   警告: h={h} 有效样本不足，跳过")
+            continue
+
+        y_train = df_clean[y_col].values
+        X_train = df_clean[stage2_vars].values
 
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X_train)
@@ -154,9 +162,10 @@ def plot_lasso_cv(df):
         axes[i].fill_between(log_alphas, mse_mean - mse_std, mse_mean + mse_std, alpha=0.2)
         axes[i].axvline(np.log(lasso.alpha_), color='red', linestyle='--', label=f'Best λ={lasso.alpha_:.4f}')
         axes[i].set_title(f'LASSO Cross-Validation (h={h})')
-        axes[i].set_xlabel('log(λ)')
+        axes[i].set_xlabel('ln(λ)')
         axes[i].set_ylabel('Mean Squared Error')
         axes[i].legend()
+        axes[i].grid(True, alpha=0.3)
 
     plt.tight_layout()
     plt.savefig(f'{FIG_DIR}/lasso_cv.png', dpi=300, bbox_inches='tight')
@@ -165,41 +174,97 @@ def plot_lasso_cv(df):
 
 
 def plot_lasso_path(df):
-    """图11: LASSO系数路径"""
+    """图11: LASSO系数路径（优化版：只显示有效区间）"""
     print("\n【5】绘制LASSO系数路径图...")
 
     train_size = int(len(df) * 0.6)
     df_train = df.iloc[:train_size]
 
-    stage2_vars = ['ivix_z', 'north_flow_z', 'margin_balance_z', 'amihud_z', 'intraday_range_z']
+    # 使用完整的变量集合（包含扩展变量）
+    stage2_vars = ['sentiment_zscore_z', 'ivix_z', 'north_flow_z', 'margin_balance_z',
+                   'amihud_z', 'momentum_20d_z', 'intraday_range_z', 'epu_z', 'fx_vol_z']
     stage2_vars = [v for v in stage2_vars if v in df_train.columns]
 
-    alphas_path = np.logspace(-4, 1, 100)
+    # 加密 alpha 网格，更精细地捕捉系数变化
+    alphas_path = np.logspace(-6, 2, 300)
 
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 
-    for i, h in enumerate([5, 60]):
-        y_train = df_train[f'AbsAR_{h}d'].values
-        X_train = df_train[stage2_vars].values
+    colors = plt.cm.tab10(np.linspace(0, 1, len(stage2_vars)))
 
+    for i, h in enumerate([5, 60]):
+        y_col = f'AbsAR_{h}d'
+        # 删除缺失值
+        df_clean = df_train.dropna(subset=[y_col] + stage2_vars)
+
+        if len(df_clean) < 20:
+            print(f"   警告: h={h} 有效样本不足，跳过")
+            continue
+
+        y_train = df_clean[y_col].values
+        X_train = df_clean[stage2_vars].values
+
+        # 标准化（与论文一致）
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X_train)
 
+        # 计算系数路径
         coefs = []
         for a in alphas_path:
-            l = Lasso(alpha=a, max_iter=2000)
+            l = Lasso(alpha=a, max_iter=5000, tol=1e-4)
             l.fit(X_scaled, y_train)
             coefs.append(l.coef_)
         coefs = np.array(coefs)
 
-        for j, var in enumerate(stage2_vars):
-            display_name = var.replace('_z', '').replace('_', ' ')
-            axes[i].plot(np.log(alphas_path), coefs[:, j], label=display_name)
+        # 找到"有效区间"：最后一个还有非零系数的 lambda
+        # 从右往左找，找到所有系数都变为0的临界点
+        non_zero_counts = np.sum(np.abs(coefs) > 1e-10, axis=1)
+        # 找到最后一个还有非零系数的位置
+        last_nonzero_idx = np.where(non_zero_counts > 0)[0]
+        if len(last_nonzero_idx) > 0:
+            # 留一些余量，显示到系数刚好变0之后一点点
+            cutoff_idx = min(last_nonzero_idx[-1] + 20, len(alphas_path) - 1)
+        else:
+            cutoff_idx = len(alphas_path) - 1
 
-        axes[i].set_title(f'LASSO Coefficient Path (h={h})')
-        axes[i].set_xlabel('log(λ)')
-        axes[i].set_ylabel('Coefficient')
-        axes[i].legend(fontsize=8)
+        # 只显示有效区间
+        alphas_display = alphas_path[:cutoff_idx + 1]
+        coefs_display = coefs[:cutoff_idx + 1, :]
+
+        # 使用自然对数，但标注更清晰的刻度
+        log_alphas = np.log(alphas_display)
+
+        for j, var in enumerate(stage2_vars):
+            # 生成可读性更好的变量名
+            display_name = var.replace('_z', '').replace('_', ' ')
+            if display_name == 'sentiment zscore':
+                display_name = 'sentiment'
+            elif display_name == 'north flow':
+                display_name = 'north_flow'
+            elif display_name == 'margin balance':
+                display_name = 'margin'
+            elif display_name == 'intraday range':
+                display_name = 'intraday'
+            elif display_name == 'momentum 20d':
+                display_name = 'momentum'
+            elif display_name == 'fx vol':
+                display_name = 'fx_vol'
+
+            axes[i].plot(log_alphas, coefs_display[:, j], label=display_name,
+                        color=colors[j], linewidth=1.5, alpha=0.8)
+
+        axes[i].axhline(y=0, color='black', linestyle='-', linewidth=0.5, alpha=0.3)
+        axes[i].set_title(f'LASSO Coefficient Path (h={h})', fontsize=12)
+        axes[i].set_xlabel('ln(λ)', fontsize=11)
+        axes[i].set_ylabel('Coefficient', fontsize=11)
+
+        # 优化图例位置
+        axes[i].legend(fontsize=8, loc='upper right', framealpha=0.9)
+        axes[i].grid(True, alpha=0.3, linestyle='--')
+
+        # 添加注释说明横轴方向
+        axes[i].text(0.02, 0.98, '← stronger penalty', transform=axes[i].transAxes,
+                    fontsize=9, verticalalignment='top', color='gray', alpha=0.7)
 
     plt.tight_layout()
     plt.savefig(f'{FIG_DIR}/lasso_path.png', dpi=300, bbox_inches='tight')
