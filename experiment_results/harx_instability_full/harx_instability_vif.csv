@@ -1,0 +1,13 @@
+variable,vif,model,target
+past_absret_5,2.254736659765588,HARX_OLS,future_absret_5
+past_absret_20,4.085965913366284,HARX_OLS,future_absret_5
+past_absret_60,3.013307774172631,HARX_OLS,future_absret_5
+epu_log_m1,1.020625416929384,HARX_OLS,future_absret_5
+fx_ret1_m1,1.0553135902588582,HARX_OLS,future_absret_5
+ppi_yoy_m1,1.3570696748083515,HARX_OLS,future_absret_5
+m2_delta1_m1,1.0538244251731435,HARX_OLS,future_absret_5
+past_absret_5,2.2464520780528145,HARX_lite_OLS,future_absret_5
+past_absret_20,4.073838258536371,HARX_lite_OLS,future_absret_5
+past_absret_60,2.9397308438708483,HARX_lite_OLS,future_absret_5
+fx_ret1_m1,1.0427849972774748,HARX_lite_OLS,future_absret_5
+ppi_yoy_m1,1.3512770543958252,HARX_lite_OLS,future_absret_5

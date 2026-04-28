@@ -1,0 +1,10 @@
+target,model,dw_stat,lb_pvalue_lag5,lb_pvalue_lag10,arch_test_pvalue,condition_number,aic,bic,resid_mean,resid_std
+future_absret_5,HAR_OLS,1.925437,0.000000,0.000000,0.000000,634.663903,-13891.855737,-13870.621566,-0.000000,0.002302
+future_absret_5,HARX_OLS,1.925714,0.000000,0.000000,0.000000,4217.071561,-13888.820073,-13846.351730,0.000000,0.002298
+future_absret_5,HARX_lite_OLS,1.925524,0.000000,0.000000,0.000000,2932.701354,-13889.596211,-13857.744954,-0.000000,0.002301
+future_absret_5,HAR_Ridge,,,,,,,,,
+future_absret_5,HARX_Ridge,,,,,,,,,
+future_logrv_20,HAR_OLS,1.973706,0.427900,0.094084,0.239960,177.455104,-1632.179793,-1610.945622,0.000000,0.139704
+future_logrv_20,HARX_OLS,1.978446,0.385184,0.095580,0.241404,1476.343521,-1627.089244,-1584.620902,0.000000,0.139568
+future_logrv_20,HAR_Ridge,,,,,,,,,
+future_logrv_20,HARX_Ridge,,,,,,,,,

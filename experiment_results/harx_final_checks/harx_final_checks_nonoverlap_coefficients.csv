@@ -1,0 +1,15 @@
+sample_type,target,model,variable,coef,std_error_hac,t_value,p_value,ci_lower,ci_upper
+rolling,future_absret_5,HAR_OLS,const,0.000506,0.000164,3.091721,0.002027,0.000185,0.000828
+rolling,future_absret_5,HAR_OLS,past_absret_5,0.823616,0.029391,28.022253,0.000000,0.765963,0.881269
+rolling,future_absret_5,HAR_OLS,past_absret_20,0.107151,0.038919,2.753166,0.005974,0.030809,0.183493
+rolling,future_absret_5,HAR_OLS,past_absret_60,0.009980,0.030625,0.325884,0.744558,-0.050092,0.070053
+nonoverlap,future_absret_5,HAR_OLS_nonoverlap,const,0.000566,0.000393,1.439961,0.150942,-0.000207,0.001339
+nonoverlap,future_absret_5,HAR_OLS_nonoverlap,past_absret_5,0.745316,0.043489,17.138069,0.000000,0.659727,0.830905
+nonoverlap,future_absret_5,HAR_OLS_nonoverlap,past_absret_20,0.197915,0.074858,2.643889,0.008636,0.050591,0.345240
+nonoverlap,future_absret_5,HAR_OLS_nonoverlap,past_absret_60,-0.008718,0.062403,-0.139702,0.888991,-0.131531,0.114096
+nonoverlap,future_absret_5,HARX_lite_OLS_nonoverlap,const,0.000780,0.000477,1.633555,0.103430,-0.000160,0.001720
+nonoverlap,future_absret_5,HARX_lite_OLS_nonoverlap,past_absret_5,0.744201,0.043686,17.035125,0.000000,0.658221,0.830180
+nonoverlap,future_absret_5,HARX_lite_OLS_nonoverlap,past_absret_20,0.199759,0.075699,2.638865,0.008765,0.050774,0.348743
+nonoverlap,future_absret_5,HARX_lite_OLS_nonoverlap,past_absret_60,-0.028324,0.067396,-0.420268,0.674599,-0.160968,0.104319
+nonoverlap,future_absret_5,HARX_lite_OLS_nonoverlap,fx_ret1_m1,0.001187,0.012201,0.097308,0.922549,-0.022827,0.025201
+nonoverlap,future_absret_5,HARX_lite_OLS_nonoverlap,ppi_yoy_m1,-0.000030,0.000039,-0.789770,0.430303,-0.000106,0.000045

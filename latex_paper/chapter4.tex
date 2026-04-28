@@ -1,272 +1,155 @@
-% 第四章 模型结果求解
+% 第4章 模型求解
 
-\section{模型结果求解}
+\section{模型求解}
 
-\subsection{第一阶段 MIDAS 结果}
+\subsection{求解流程说明}
 
-第一阶段 MIDAS 结果需要同时区分样本内拟合与样本外预测。样本内看，多数宏观变量在5日与60日窗口下都表现出统计显著性，但这并不等于具有稳定的样本外预测能力。样本外看，5日窗口中PPI对应的单变量模型表现最好，但$R^2_{OS}$仅为0.0019，改进幅度很弱；60日窗口最优单变量模型的样本外$R^2_{OS}$为0.0392，虽优于历史均值基准，但增益仍然有限。由此看，第一阶段更适合被理解为条件预期收益率基准的构造工具，而不宜被表述为具有较强样本外预测能力的收益率预测模型。具体看，5日窗口下PPI仅提供极弱的样本外增量信息，经济意义有限；60日窗口下虽然样本外$R^2_{OS}$转为正值，但总体提升仍不大，说明长窗口预测依然容易受到结构变化与参数不稳定影响。训练集上的VIF检验又使精简多变量模型难以稳定成立，故第一阶段更适合作为后续偏离识别的预期基准。
+模型求解过程围绕"先识别基准动态，再检验扩展作用"的顺序展开。第一步，从日对数收益率出发构造主因变量和辅助因变量，并进一步生成HAR历史状态变量。第二步，把月度宏观变量按信息可得性原则映射到日频样本。第三步，在训练集上估计HAR\_OLS、HARX\_OLS与HARX-lite\_OLS，并计算HAC稳健标准误和相关统计量。第四步，在相同训练/测试划分下对模型进行样本外评估，以判断基准模型和扩展模型在外推表现上的差异。最后再通过非重叠窗口、单变量宏观扩展和分样本比较完成收尾检验。
 
-% 表4-1：单变量MIDAS模型系数估计
-\begin{table}[htbp]
+这一求解思路与老版本"两阶段收益率—偏离"框架相比更集中。过去的第一阶段承担的是条件预期收益率构造任务，现在的主模型则直接面向"短期不稳定性"这一更可解释的状态指标。这样一来，模型求解不再需要通过高维混频权重去追求微弱的收益率样本外改进，而是转向利用HAR结构识别更稳健的时间尺度效应。
+
+\subsection{主目标\texttt{future\_absret\_5}的HAR基准结果}
+
+HAR\_OLS的估计结果表明，\texttt{past\_absret\_5}的系数为0.8236，HAC标准误为0.0294，\(t\)值达到28.0223；\texttt{past\_absret\_20}的系数为0.1072，\(p\)值为0.0060；\texttt{past\_absret\_60}的系数为0.0100，\(p\)值为0.7446。模型的训练集\(R^2\)为0.7924，调整后\(R^2\)为0.7920，AIC为-13891.86，BIC为-13870.62。Durbin--Watson统计量为1.9254，接近2，但Ljung--Box与ARCH--LM检验均显示残差仍存在序列相关和异方差，因此采用HAC推断是必要的。
+
+这些结果说明，未来一周平均波动幅度的主要解释来源是近5日和近20日的历史不稳定状态，60日尺度在控制其他变量后几乎不再贡献显著解释。换到金融学语言中，这意味着市场不稳定性的延续主要受短期与中期状态驱动，而较长期历史背景对未来一周幅度的边际作用已经很弱。
+
+% 表4-1：future_absret_5的HAR_OLS回归结果
+\begin{table*}[htbp]
 \centering
-\caption{单变量 MIDAS 模型系数估计}
-\label{tab:midas_coef}
-\small
-\begin{tabular}{llcccc}
-\topline
-\textbf{预测窗口} & \textbf{变量} & \textbf{系数} & \textbf{t统计量} & \textbf{显著性} & \textbf{Beta参数}(a,b) \\
-\midline
-\multirow{5}{*}{5日} & CPI & 0.0035 & 4.16 & $^{***}$ & (1.15, 1.82) \\
- & PPI & -0.0005 & -2.43 & $^{**}$ & (0.0001, 0.0001) \\
- & M2增速 & 0.0010 & 0.34 &  & (0.0001, 2.98) \\
- & EPU & 0.000009 & 2.97 & $^{***}$ & (1.50, 1.50) \\
- & USD/CNY & 0.0001 & 4.54 & $^{***}$ & (1.50, 1.50) \\
-\midline
-\multirow{5}{*}{60日} & CPI & 0.0383 & 19.46 & $^{***}$ & (0.14, 0.99) \\
- & PPI & -0.0049 & -11.42 & $^{***}$ & (1.93, 0.98) \\
- & M2增速 & -0.0052 & 0.52 &  & (46.38, 7.39) \\
- & EPU & 0.0001 & 9.69 & $^{***}$ & (0.34, 2.89) \\
- & USD/CNY & — & — &  &  \\
-\bottomline
-\end{tabular}
-\end{table}
-
-注：系数为MIDAS加权项的回归系数，基于Beta权重函数参数$(a,b)$估计。$^{***}$、$^{**}$、$^{*}$分别表示在1\%、5\%、10\%水平显著。
-
-% 表4-2：第一阶段MIDAS模型估计结果
-\begin{table}[htbp]
-\centering
-\caption{第一阶段 MIDAS 模型估计结果}
-\label{tab:midas_results}
-\small
+\footnotesize
+\caption{\texttt{future\_absret\_5}的HAR\_OLS回归结果}
+\label{tab:har-ols}
 \begin{tabular}{lccccc}
 \topline
-\textbf{模型} & \textbf{预测窗口} & \textbf{样本内$R^2$} & \textbf{样本外$R^2_{OS}$} & \textbf{RMSE} & \textbf{MAE} \\
+变量 & 系数 & HAC标准误 & \(t\)值 & \(p\)值 & 95\%置信区间 \\
 \midline
-单变量（PPI） & 5日 & 0.4012 & 0.0019 & 0.0256 & 0.0179 \\
-单变量（PPI） & 60日 & 0.3128 & 0.0392 & 0.0852 & 0.0710 \\
+\texttt{const} & 0.000506 & 0.000164 & 3.0917 & 0.0020 & [0.000185, 0.000828] \\
+\texttt{past\_absret\_5} & 0.823616 & 0.029391 & 28.0223 & 0.0000 & [0.765963, 0.881269] \\
+\texttt{past\_absret\_20} & 0.107151 & 0.038919 & 2.7532 & 0.0060 & [0.030809, 0.183493] \\
+\texttt{past\_absret\_60} & 0.009980 & 0.030625 & 0.3259 & 0.7446 & [-0.050092, 0.070053] \\
+\midline
+\multicolumn{6}{l}{模型诊断：\(R^2\)=0.7924，调整后\(R^2\)=0.7920，AIC=-13891.86，BIC=-13870.62，DW=1.9254} \\
 \bottomline
 \end{tabular}
-\end{table}
+\end{table*}
 
-% 图4-1：未来5日累计收益率真实值与预测值对比
-\begin{figure}[htbp]
+\subsection{HARX扩展结果与HARX-lite比较}
+
+在HAR基准之上加入四个宏观变量后，HARX\_OLS的训练集\(R^2\)从0.7924小幅上升到0.7931，调整后\(R^2\)从0.7920上升到0.7922，但四个宏观变量单个均未达到常用显著性标准。\texttt{epu\_log\_m1}的系数为-0.000137，\(p\)值0.3967；\texttt{fx\_ret1\_m1}的系数为-0.000654，\(p\)值0.9084；\texttt{ppi\_yoy\_m1}的系数为-0.000024，\(p\)值0.1987；\texttt{m2\_delta1\_m1}的系数为0.000176，\(p\)值0.1632。模型条件数升至4217.07，虽未出现明显共线性爆炸，但数值稳定性较HAR基准更弱。
+
+HARX-lite只保留\texttt{fx\_ret1\_m1}与\texttt{ppi\_yoy\_m1}两个相对更具经济含义的变量，其结果与完整HARX基本相当。训练集\(R^2\)为0.7927，调整后\(R^2\)为0.7920，AIC和BIC略优于完整HARX，但扩展变量仍未显著。这样的结果说明，宏观变量即使经过精简，其增量作用仍然有限，更适合作为补充分析，而不宜替代基准HAR结构。
+
+% 表4-2：future_absret_5的HARX_OLS回归结果
+\begin{table*}[htbp]
 \centering
-\includegraphics[width=0.9\textwidth]{figures/true_pred_5d.png}
-\caption{未来5日累计收益率真实值与预测值对比}
-\label{fig:true_pred_5d}
-\end{figure}
+\footnotesize
+\caption{\texttt{future\_absret\_5}的HARX\_OLS回归结果}
+\label{tab:harx-ols}
+\begin{tabular}{lccccc}
+\topline
+变量 & 系数 & HAC标准误 & \(t\)值 & \(p\)值 & 95\%置信区间 \\
+\midline
+\texttt{const} & 0.001562 & 0.000995 & 1.5705 & 0.1165 & [-0.000389, 0.003513] \\
+\texttt{past\_absret\_5} & 0.822169 & 0.028853 & 28.4956 & 0.0000 & [0.765573, 0.878765] \\
+\texttt{past\_absret\_20} & 0.108830 & 0.039023 & 2.7889 & 0.0054 & [0.032285, 0.185376] \\
+\texttt{past\_absret\_60} & -0.008517 & 0.032633 & -0.2610 & 0.7941 & [-0.072528, 0.055494] \\
+\texttt{epu\_log\_m1} & -0.000137 & 0.000162 & -0.8478 & 0.3967 & [-0.000455, 0.000180] \\
+\texttt{fx\_ret1\_m1} & -0.000654 & 0.005684 & -0.1150 & 0.9084 & [-0.011804, 0.010496] \\
+\texttt{ppi\_yoy\_m1} & -0.000024 & 0.000018 & -1.2859 & 0.1987 & [-0.000059, 0.000012] \\
+\texttt{m2\_delta1\_m1} & 0.000176 & 0.000126 & 1.3950 & 0.1632 & [-0.000072, 0.000424] \\
+\bottomline
+\end{tabular}
+\end{table*}
 
-% 图4-2：未来60日累计收益率真实值与预测值对比
-\begin{figure}[htbp]
+% 表4-3：future_absret_5的HARX-lite回归结果
+\begin{table*}[htbp]
 \centering
-\includegraphics[width=0.9\textwidth]{figures/true_pred_60d.png}
-\caption{未来60日累计收益率真实值与预测值对比}
-\label{fig:true_pred_60d}
-\end{figure}
+\footnotesize
+\caption{\texttt{future\_absret\_5}的HARX-lite回归结果}
+\label{tab:harx-lite}
+\begin{tabular}{lccccc}
+\topline
+变量 & 系数 & HAC标准误 & \(t\)值 & \(p\)值 & 95\%置信区间 \\
+\midline
+\texttt{const} & 0.000655 & 0.000194 & 3.3836 & 0.0007 & [0.000275, 0.001035] \\
+\texttt{past\_absret\_5} & 0.822950 & 0.028899 & 28.4767 & 0.0000 & [0.766262, 0.879637] \\
+\texttt{past\_absret\_20} & 0.108117 & 0.038904 & 2.7791 & 0.0055 & [0.031804, 0.184429] \\
+\texttt{past\_absret\_60} & -0.003404 & 0.032676 & -0.1042 & 0.9170 & [-0.067500, 0.060691] \\
+\texttt{fx\_ret1\_m1} & 0.000923 & 0.005641 & 0.1636 & 0.8701 & [-0.010141, 0.011987] \\
+\texttt{ppi\_yoy\_m1} & -0.000021 & 0.000018 & -1.1685 & 0.2428 & [-0.000057, 0.000014] \\
+\bottomline
+\end{tabular}
+\end{table*}
 
-% 图4-3：第一阶段残差诊断图
-\begin{figure}[htbp]
+\subsection{增量检验与共线性诊断}
+
+HAR与HARX的嵌套检验显示，宏观变量作为一组并未形成稳健的增量解释力。对于\texttt{future\_absret\_5}，加入四个宏观变量后，\(R^2\)仅增加0.000689，调整后\(R^2\)仅增加0.000132，联合F检验统计量为1.2365，对应\(p\)值为0.2934。换言之，尽管扩展模型在训练样本中有极小幅度的拟合提升，但从统计检验意义上看，这种提升不足以支持"宏观变量整体上显著改善解释力"的表述。
+
+共线性诊断方面，HARX\_OLS中的VIF最大值为4.09，HARX-lite中最大值为4.07，均低于5，说明正式模型已不存在前期高维特征设计中的明显共线性问题。宏观变量作用较弱，主要不是由严重多重共线性所致，而更可能源于它们对短期不稳定性的边际解释本身有限。
+
+% 表4-4：主模型样本内外比较
+\begin{table*}[htbp]
 \centering
-\includegraphics[width=0.9\textwidth]{figures/residual_stage1.png}
-\caption{第一阶段 MIDAS 模型残差诊断图}
-\label{fig:residual_stage1}
-\end{figure}
-
-\subsection{第二阶段异常收益偏离结果}
-
-第二阶段结果显示，短窗口与长窗口的偏离机制并不相同。5日窗口下，模型I的调整后$R^2$为0.0563，说明情绪与风险感知变量对短期偏离具有基础解释力。模型II加入资金与杠杆变量后，调整后$R^2$略降至0.0551，说明这组变量对短期偏离并未形成稳定增量。模型III进一步加入流动性与交易状态变量后，调整后$R^2$提升至0.0726，且新增变量组联合检验显著，表明短期偏离的解释力主要来自风险感知、短期交易趋势与日内波动扩张，而非资金组单独进入。LASSO在5日窗口下保留了ivix、north\_flow、momentum\_20d与intraday\_range，说明短期偏离主要集中在风险感知抬升、交易动量延续与日内波动扩张阶段。需要注意的是，EPU虽然进入了LASSO扩展集合，但在模型IV的新增变量联合检验中未形成显著增量解释力（$p=0.376$），因此更适合将其理解为短期偏离中的弱边际信息，而不宜将政策不确定性表述为短期偏离的核心驱动因素。
-
-60日窗口下，模型I的调整后$R^2$为-0.0003，单独依靠情绪与风险感知变量难以解释长期偏离；模型II与模型III分别将调整后$R^2$提升至0.0212与0.0306，说明资金组与流动性组在嵌套回归中具有增量解释力。扩展模型IV进一步将调整后$R^2$提升至0.1165。与此相比，LASSO在60日窗口未保留变量，说明长期偏离的识别结果对筛选准则较为敏感：嵌套回归强调新增变量组的解释力，LASSO强调稀疏保留，二者反映的是不同层面的信息。
-
-% 表4-3：第二阶段分组嵌套回归估计结果
-\begin{table}[htbp]
-\centering
-\caption{第二阶段分组嵌套回归估计结果}
-\label{tab:stage2_results}
-\small
-\resizebox{\textwidth}{!}{%
+\footnotesize
+\caption{主模型样本内外比较}
+\label{tab:model-comparison}
 \begin{tabular}{lcccccc}
 \topline
-\textbf{预测窗口} & \textbf{模型} & \textbf{调整后$R^2$} & \textbf{增量解释力} & \textbf{联合检验F} & \textbf{联合检验p值} & \textbf{LASSO保留变量} \\
+模型 & 训练集\(R^2\) & 调整后\(R^2\) & 测试集\(R^2_{OS}\) & RMSE & MAE & AIC \\
 \midline
-5日 & 模型I（情绪） & 0.0563 & — & — & — & — \\
-5日 & 模型II（+资金） & 0.0551 & -0.0012 & 0.13 & 0.876 & — \\
-5日 & 模型III（+流动性） & 0.0726 & 0.0175 & 4.41 & 0.004$^{***}$ & — \\
-5日 & 模型IV（+EPU+FX） & 0.0745 & 0.0019 & 0.98 & 0.376 & — \\
-5日 & 综合模型 & 0.0746 & — & — & — & ivix, north\_flow, momentum\_20d, intraday\_range \\
-\midline
-60日 & 模型I（情绪） & -0.0003 & — & — & — & — \\
-60日 & 模型II（+资金） & 0.0212 & 0.0215 & 4.65 & 0.010$^{***}$ & — \\
-60日 & 模型III（+流动性） & 0.0306 & 0.0094 & 2.53 & 0.056$^{*}$ & — \\
-60日 & 模型IV（+EPU+FX） & 0.1165 & 0.0859 & 2.76 & 0.064$^{*}$ & — \\
-60日 & 综合模型 & -0.0003 & — & — & — & （无） \\
-\bottomline
-\end{tabular}%
-}
-\end{table}
-
-注：增量解释力为相对于前一模型的调整后$R^2$变化。$^{***}$、$^{**}$、$^{*}$分别表示在1\%、5\%、10\%水平显著。模型IV在模型III基础上加入EPU与汇率波动代理变量fx\_vol。5日综合模型对应LASSO基础变量集合保留结果。60日窗口下，LASSO稀疏筛选未保留任何变量，因此表中"60日综合模型"按LASSO结果报告为无保留变量。两种口径分别对应稀疏筛选与解释性回归，不宜混写为同一种模型结论。
-
-% 表4-4：第二阶段完整嵌套模型核心变量系数估计
-\begin{table}[htbp]
-\centering
-\caption{第二阶段完整嵌套模型（模型III）核心变量系数估计}
-\label{tab:stage2_coef_full}
-\small
-\begin{tabular}{llccc}
-\topline
-\textbf{预测窗口} & \textbf{变量} & \textbf{系数} & \textbf{t统计量} & \textbf{显著性} \\
-\midline
-\multirow{7}{*}{5日（模型III）} & sentiment\_zscore & 0.0001 & 0.21 &  \\
- & ivix & 0.0051 & 4.48 & $^{***}$ \\
- & north\_flow & -0.0006 & -0.93 &  \\
- & margin\_balance & -0.0002 & -0.25 &  \\
- & amihud & 0.0001 & 0.16 &  \\
- & momentum\_20d & 0.0026 & 2.84 & $^{***}$ \\
- & intraday\_range & 0.0023 & 1.93 & $^{*}$ \\
-\midline
-\multirow{7}{*}{60日（模型III）} & sentiment\_zscore & -0.0023 & -1.76 & $^{*}$ \\
- & ivix & 0.0090 & 1.18 &  \\
- & north\_flow & 0.0067 & 2.67 & $^{***}$ \\
- & margin\_balance & -0.0029 & -0.45 &  \\
- & amihud & 0.0068 & 2.06 & $^{**}$ \\
- & momentum\_20d & 0.0022 & 0.39 &  \\
- & intraday\_range & -0.0113 & -2.12 & $^{**}$ \\
+HAR\_OLS & 0.7924 & 0.7920 & 0.8233 & 0.002109 & 0.001363 & -13891.86 \\
+HARX\_OLS & 0.7931 & 0.7922 & 0.8217 & 0.002119 & 0.001374 & -13888.82 \\
+HARX\_lite\_OLS & 0.7927 & 0.7920 & 0.8219 & 0.002117 & 0.001375 & -13889.60 \\
+HAR\_Ridge & 0.7884 & 0.7880 & 0.8078 & 0.002200 & 0.001410 & -- \\
+HARX\_Ridge & 0.7891 & 0.7881 & 0.8061 & 0.002210 & 0.001424 & -- \\
+Mean\_Benchmark & -- & -- & 0.0000 & 0.005018 & 0.003247 & -- \\
 \bottomline
 \end{tabular}
-\end{table}
+\end{table*}
 
-注：系数估计基于完整嵌套模型（模型III），包含七个解释变量，采用HAC稳健标准误。变量均按训练集均值与标准差标准化处理。
-
-\subsubsection{扩展模型IV：政策不确定性与汇率波动的影响}
-
-为将政策不确定性与外部环境变量正式纳入偏离识别框架，本文在模型III基础上进一步加入经济政策不确定性指数（EPU）与汇率波动代理变量$fx\_vol$，构造扩展模型IV。汇率波动代理变量采用美元兑人民币汇率变动率的20日滚动波动率构造，并按训练集均值与标准差标准化处理。
-
-扩展模型IV的结果显示，5日窗口下新增政策与汇率变量并未带来显著的解释力增量（联合检验$p=0.376$），短期偏离仍主要由情绪、风险感知与交易状态驱动。60日窗口下，模型IV的调整后$R^2$从0.0306提升至0.1165，新增变量联合F检验显著（$p=0.064$），说明政策不确定性与汇率波动作为一组变量，显著增强了长期偏离的解释力。单个变量层面上，$fx\_vol$在5\%水平显著，EPU单独系数未表现出稳定显著性，因此更合适的解读是：长期偏离解释力的提升主要来自新增变量组的联合进入，而不是任一单个新增变量形成了绝对主导作用。momentum\_20d在扩展模型中的系数方向和数量级应结合完整协变量集合下的重新估计结果理解，本文不将其单独扩展为核心结论。
-
-% 表4-5：扩展模型IV系数估计
-\begin{table}[htbp]
+% 表4-5：HAR与HARX的增量检验结果
+\begin{table*}[htbp]
 \centering
-\caption{扩展模型IV系数估计（加入EPU与FX波动）}
-\label{tab:model4_coef}
-\small
-\begin{tabular}{llccc}
-\topline
-\textbf{预测窗口} & \textbf{变量} & \textbf{系数} & \textbf{t统计量} & \textbf{显著性} \\
-\midline
-\multirow{9}{*}{5日（模型IV）} & sentiment\_zscore & 0.0001 & 0.26 &  \\
- & ivix & 0.0048 & 3.66 & $^{***}$ \\
- & north\_flow & -0.0006 & -1.01 &  \\
- & margin\_balance & -0.0001 & -0.18 &  \\
- & amihud & 0.0001 & 0.12 &  \\
- & momentum\_20d & 0.0025 & 2.75 & $^{***}$ \\
- & intraday\_range & 0.0023 & 1.98 & $^{**}$ \\
- & epu & 0.0009 & 1.06 &  \\
- & fx\_vol & -0.0007 & -0.76 &  \\
-\midline
-\multirow{9}{*}{60日（模型IV）} & sentiment\_zscore & -0.0019 & -1.34 &  \\
- & ivix & -0.0023 & -0.24 &  \\
- & north\_flow & 0.0055 & 2.24 & $^{**}$ \\
- & margin\_balance & -0.0022 & -0.41 &  \\
- & amihud & 0.0045 & 1.37 &  \\
- & momentum\_20d & 0.0020 & 0.34 &  \\
- & intraday\_range & -0.0077 & -1.53 &  \\
- & epu & 0.0106 & 1.23 &  \\
- & fx\_vol & 0.0186 & 2.35 & $^{**}$ \\
-\bottomline
-\end{tabular}
-\end{table}
-
-注：系数估计基于扩展模型IV，在模型III基础上加入经济政策不确定性指数（EPU）与汇率波动代理变量fx\_vol，采用Newey--West HAC稳健标准误。第二阶段连续解释变量按训练集均值和标准差进行标准化处理。$^{***}$、$^{**}$、$^{*}$分别表示在1\%、5\%、10\%水平显著。
-
-% 表4-6：模型III与模型IV增量解释力对比
-\begin{table}[htbp]
-\centering
-\caption{模型III与模型IV增量解释力对比}
-\label{tab:model3_vs_model4}
-\small
+\footnotesize
+\caption{HAR与HARX的增量检验结果}
+\label{tab:incremental-tests}
 \begin{tabular}{lcccccc}
 \topline
-\textbf{预测窗口} & \textbf{模型} & \textbf{调整后$R^2$} & \textbf{增量解释力} & \textbf{新增变量联合F} & \textbf{联合检验p值} & \textbf{显著性} \\
+目标变量 & 基准模型 & 扩展模型 & \(\Delta R^2\) & \(\Delta\)调整后\(R^2\) & F统计量 & \(p\)值 \\
 \midline
-5日 & 模型III & 0.0726 & — & — & — & — \\
-5日 & 模型IV & 0.0745 & 0.0019 & 0.98 & 0.376 &  \\
-\midline
-60日 & 模型III & 0.0306 & — & — & — & — \\
-60日 & 模型IV & 0.1165 & 0.0859 & 2.76 & 0.064 & $^{*}$ \\
+\texttt{future\_absret\_5} & HAR\_OLS & HARX\_OLS & 0.000689 & 0.000132 & 1.2365 & 0.2934 \\
+\texttt{future\_logrv\_20} & HAR\_OLS & HARX\_OLS & 0.000048 & -0.000018 & 0.7242 & 0.5754 \\
 \bottomline
 \end{tabular}
-\end{table}
+\end{table*}
 
-% 图4-4：第二阶段残差诊断图
-\begin{figure}[htbp]
+% 表4-6：HARX模型的VIF诊断
+\begin{table*}[htbp]
 \centering
-\includegraphics[width=0.9\textwidth]{figures/residual_stage2.png}
-\caption{第二阶段分组嵌套回归残差诊断图}
-\label{fig:residual_stage2}
-\end{figure}
-
-% 图4-5：LASSO惩罚参数选择结果
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.9\textwidth]{figures/lasso_cv.png}
-\caption{LASSO惩罚参数选择结果}
-\label{fig:lasso_cv}
-\end{figure}
-
-% 图4-6：LASSO系数路径图（扩展版，含EPU和fx_vol）
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.9\textwidth]{figures/lasso_path_extended.png}
-\caption{第二阶段变量的LASSO系数路径图（含扩展变量）}
-\label{fig:lasso_path}
-\end{figure}
-
-\subsection{模型评价与结果综合判断}
-
-本文对第一阶段与第二阶段结果的评价分别采用不同口径。第一阶段关注样本内拟合与样本外预测表现，主要使用 $R^2$、调整后 $R^2$、RMSE、MAE 与样本外 $R^2_{OS}$ 判断宏观变量构造条件预期收益率的效果。第二阶段关注偏离识别的解释力，核心指标为调整后 $R^2$、新增变量组联合显著性检验以及 HAC 修正后的系数显著性。这样的区分对应了两阶段模型承担的不同任务：前者用于形成条件预期收益率基准，后者用于解释市场围绕该基准发生偏离的原因。
-
-从第一阶段看，样本内显著性与样本外预测能力明显分离。宏观变量可以进入条件预期，却不足以提供强样本外预测增益。5日窗口样本外$R^2_{OS}=0.0019$，60日窗口$R^2_{OS}=0.0392$，均远低于样本内$R^2$。第一阶段的核心用途因此更偏向"形成理论预期收益率基准"，而非"单独做收益预测"。
-
-从第二阶段看，短窗口偏离解释更稳定，长窗口偏离解释更敏感。5日窗口下，风险感知、动量和日内振幅的作用较集中，模型III调整后$R^2$达到0.0726；长窗口下，模型IV调整后$R^2$提升至0.1165，新增变量组联合检验$p=0.064$（10\%水平显著），说明长期偏离机制除市场内部交易状态外，还受到政策预期与外部环境变化的共同影响。单个变量层面上，汇率波动代理变量在60日窗口显著为正，EPU单独系数未显示稳定显著性。需要注意的是，5日窗口下EPU虽然在模型IV的联合增量检验中未表现出显著解释力（联合F检验$p=0.376$），但在LASSO扩展集合中仍被保留。这说明其短期作用更接近弱边际信息，而不足以支撑将政策不确定性表述为短期偏离的核心驱动因素。
-
-扩展模型IV的结果表明，政策不确定性与汇率波动对60日窗口偏离的解释力增量显著（调整后$R^2$从0.0306提升至0.1165，联合F检验$p=0.064$），但对5日窗口的影响有限（增量仅0.0019）。这说明政策与外部环境变量主要作用于中长期偏离，而非短期波动放大机制。
-
-综合来看，本文完成了“宏观基本面—条件预期收益率—实际市场表现—预期偏离—偏离成因识别”的分析链条。第一阶段用于形成预期基准，第二阶段用于识别市场围绕该基准发生偏离的机制。短期偏离主要与风险感知和交易状态有关，长期偏离还受到政策不确定性与汇率波动等外部因素影响。
-
-% 表4-5：评价指标说明
-\begin{table}[htbp]
-\centering
-\caption{评价指标说明}
-\label{tab:metrics}
-\small
-\begin{tabular}{lp{6cm}c}
+\footnotesize
+\caption{HARX模型的VIF诊断}
+\label{tab:vif}
+\begin{tabular}{llc}
 \topline
-\textbf{指标} & \textbf{计算公式/含义} & \textbf{判断标准} \\
+模型 & 变量 & VIF \\
 \midline
-$R^2$/调整后$R^2$ & 拟合优度与自由度修正 & 越大越好 \\
-AIC & 信息准则，考虑参数个数 & 越小越好 \\
-BIC & 信息准则，包含样本量惩罚 & 越小越好 \\
-RMSE & 均方根误差 & 越小越好 \\
-MAE & 平均绝对误差 & 越小越好 \\
-$R^2_{OS}$ & 相对历史均值基准的样本外改进 & 大于0较好 \\
+\multirow{7}{*}{HARX\_OLS}
+& \texttt{past\_absret\_5} & 2.25 \\
+& \texttt{past\_absret\_20} & 4.09 \\
+& \texttt{past\_absret\_60} & 3.01 \\
+& \texttt{epu\_log\_m1} & 1.02 \\
+& \texttt{fx\_ret1\_m1} & 1.06 \\
+& \texttt{ppi\_yoy\_m1} & 1.36 \\
+& \texttt{m2\_delta1\_m1} & 1.05 \\
 \bottomline
 \end{tabular}
-\end{table}
+\end{table*}
 
-% 图4-7：分组嵌套回归边际解释力变化（含扩展模型IV）
+% 图4-1：future_absret_5的拟合散点图
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=0.9\textwidth]{figures/marginal_r2_extended.png}
-\caption{分组嵌套回归的边际解释力变化（含扩展模型IV）}
-\label{fig:marginal_r2}
-\end{figure}
-
-% 图4-8：扩展模型IV解释力变化图
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=0.9\textwidth]{figures/model4_r2_comparison.png}
-\caption{扩展模型IV与主模型的解释力比较}
-\label{fig:model4_comparison}
+\includegraphics[width=0.85\textwidth]{figures/har_scatter.png}
+\caption{\texttt{future\_absret\_5}的HAR\_OLS拟合散点图}
+\label{fig:har-fit}
 \end{figure}

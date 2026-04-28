@@ -1,0 +1,7 @@
+model,sample_type,dw_stat,lb_pvalue_lag5,arch_pvalue,condition_number
+HAR_OLS,rolling,1.925437,0.000000,0.000000,634.663903
+HAR_OLS_nonoverlap,nonoverlap,2.752647,0.000000,0.000000,654.788497
+HARX_lite_OLS_nonoverlap,nonoverlap,2.753579,0.000000,0.000000,3025.784198
+HAR_OLS,rolling,1.925437,0.000000,0.000000,634.663903
+HAR_plus_fx_ret1_m1,rolling,1.925509,0.000000,0.000000,636.618044
+HAR_plus_ppi_yoy_m1,rolling,1.925443,0.000000,0.000000,2925.203794

@@ -10,6 +10,7 @@
 
 % 图表宏包
 \usepackage{graphicx}
+\usepackage{pdfpages}
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{multirow}
@@ -36,8 +37,6 @@
 
 % 代码与算法
 \usepackage{listings}
-% \usepackage{algorithm}
-% \usepackage{algpseudocode}
 
 % 标题格式
 \usepackage{titlesec}
@@ -46,7 +45,7 @@
 \usepackage{fancyhdr}
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[C]{\small 宏观基本面、理论预期与市场偏离：基于沪深300指数的实证分析}
+\fancyhead[C]{\small 股票市场短期不稳定性的动态结构与宏观增量检验}
 \fancyfoot[C]{\thepage}
 
 % 交叉引用增强
@@ -68,7 +67,7 @@
 \newtheorem{definition}{定义}
 
 % 文档信息
-\title{\textbf{宏观基本面、理论预期与市场偏离：\\基于沪深300指数的两阶段实证分析}}
+\title{\textbf{股票市场短期不稳定性的动态结构与宏观增量检验\\——基于HAR与HARX模型的实证研究}}
 \author{}
 \date{}
 
@@ -77,14 +76,14 @@
 \maketitle
 
 \begin{abstract}
-\noindent 股票市场价格如何在宏观基本面、风险预期与交易行为共同作用下形成，一直是宏观金融研究中的核心问题。本文以沪深300指数为研究对象，在数据可得性约束下选取2015年7月2日至2025年12月25日样本，围绕“宏观基本面—理论预期—实际市场表现—预期偏离—偏离成因识别”构建两阶段实证框架。研究将宏观经济变量、货币金融变量、政策变量与外部环境变量纳入统一信息集，以条件预期收益率为核心理论预期指标，考察未来5日与未来60日累计收益率的形成与偏离机制。
+\noindent 股票市场波动幅度的阶段性扩张与收敛直接影响风险管理、资产配置以及政策评估。相较于未来收益率方向预测，短期不稳定性更容易呈现出连续且可识别的时间结构，也更适合在回归框架下讨论历史状态延续与宏观环境扰动的相对作用。本文以沪深300指数为研究对象，选取2015年9月28日至2025年12月24日的有效样本，围绕"短期不稳定性的多尺度持续性"与"宏观变量的增量解释作用"构建统一的经验分析框架。研究将未来五个交易日平均绝对收益定义为主因变量，用以刻画未来一周平均波动幅度；同时构造未来二十日实现波动率对数形式作为辅助稳健性目标。在模型设定上，先利用过去5日、20日和60日平均绝对收益建立HAR基准模型，再引入经济政策不确定性、汇率月度变化、工业品价格同比增速与货币增速边际变化构建HARX扩展模型，并采用Newey--West HAC稳健标准误进行统计推断。
 
-第一阶段采用MIDAS混频回归模型，利用CPI、PPI、M2同比增速、经济政策不确定性指数和美元兑人民币汇率等变量构造宏观条件预期收益率。结果显示，经VIF检验后，仅PPI满足进入主模型的共线性要求，原计划的精简多变量设定在实证中退化为单变量模型。样本外评估表明，5日窗口最优单变量模型的样本外 $R^2_{OS}$ 为0.0019，60日窗口样本外 $R^2_{OS}$ 为0.0392，均明显低于样本内拟合水平。第一阶段结果说明，宏观变量更适合用于构造条件预期收益率基准，而不宜被表述为具有稳定样本外优势的强预测因子。
+实证结果表明，股票市场短期不稳定性具有显著且稳定的多时间尺度持续性。未来一周平均波动幅度主要由过去5日和过去20日历史状态驱动，其中短期状态的解释作用最强，中期状态提供稳定补充，60日尺度边际作用较弱。HAR基准模型在训练集上的拟合优度较高，样本外表现同样稳定，说明短期不稳定性具有较强的可识别动态结构。相较之下，宏观变量进入HARX模型后，样本内拟合仅有极小幅提升，联合增量检验未达到显著水平，样本外表现也未优于HAR基准模型。单变量逐个进入的扩展结果进一步表明，工业品价格同比和货币增速边际变化较其他变量更接近边际显著，但整体作用仍应谨慎表述。非重叠窗口稳健性检验显示，核心HAR系数方向与显著性基本保持稳定，说明主模型并不依赖于滚动平滑构造。分样本检验则表明，过去5日与过去20日历史状态的作用具有较强稳定性，宏观变量的边际影响随阶段变化而波动。
 
-第二阶段以第一阶段得到的条件预期收益率为基准，构造异常收益及异常收益绝对值，并将情绪、资金流向、流动性、政策不确定性、汇率波动与隐含波动率纳入偏离识别框架。正式回归结果表明，5日窗口下，iVIX、20日动量与日内振幅对异常收益偏离具有较稳定的解释力，模型III调整后 $R^2$ 达到0.0726；60日窗口下，资金变量与流动性变量在嵌套回归中带来增量解释力。扩展模型IV在加入经济政策不确定性指数（EPU）与汇率波动代理变量（fx\_vol）后，60日窗口调整后 $R^2$ 从0.0306提升至0.1165，新增变量联合F检验为2.76（$p=0.064$），在10\%水平上呈现边际显著。说明政策不确定性与汇率波动作为一组新增变量，对60日窗口长期偏离的解释力有所增强；从单个变量看，汇率波动代理变量在60日窗口显著为正，经济政策不确定性指数单独系数未表现出稳定显著性。
+本文的经验结果支持将第一阶段正式表述为基于HAR回归的股票市场短期不稳定性基准模型。与直接预测收益率方向相比，该框架在统计上更稳，在金融学上也更容易解释。研究同时表明，在当前样本、变量口径与时间尺度设定下，短期不稳定性的主要驱动来自市场内部状态的延续，宏观环境更多体现为背景性扰动而非核心预测来源。
 
 \vspace{1em}
-\noindent\textbf{关键词：}宏观基本面；MIDAS模型；理论预期收益率；市场偏离；沪深300；隐含波动率
+\noindent\textbf{关键词：}股票市场短期不稳定性；HAR模型；HARX回归；宏观变量；沪深300
 \end{abstract}
 
 \thispagestyle{fancy}
@@ -104,6 +103,17 @@
 
 % 参考文献
 \newpage
-\bibliography{references}
+\begin{thebibliography}{99}
+\bibitem{engle1982} Engle R F. Autoregressive Conditional Heteroscedasticity with Estimates of the Variance of United Kingdom Inflation[J]. Econometrica, 1982, 50(4): 987-1007.
+\bibitem{bollerslev1986} Bollerslev T. Generalized Autoregressive Conditional Heteroskedasticity[J]. Journal of Econometrics, 1986, 31(3): 307-327.
+\bibitem{andersen2003} Andersen T G, Bollerslev T, Diebold F X, Labys P. Modeling and Forecasting Realized Volatility[J]. Econometrica, 2003, 71(2): 579-625.
+\bibitem{corsi2009} Corsi F. A Simple Approximate Long-Memory Model of Realized Volatility[J]. Journal of Financial Econometrics, 2009, 7(2): 174-196.
+\bibitem{schwert1989} Schwert G W. Why Does Stock Market Volatility Change over Time?[J]. The Journal of Finance, 1989, 44(5): 1115-1153.
+\bibitem{baker2016} Baker S R, Bloom N, Davis S J. Measuring Economic Policy Uncertainty[J]. The Quarterly Journal of Economics, 2016, 131(4): 1593-1636.
+\bibitem{pastor2012} Pastor L, Veronesi P. Uncertainty about Government Policy and Stock Prices[J]. The Journal of Finance, 2012, 67(4): 1219-1264.
+\bibitem{wang2004} 王美今, 孙建军. 中国股市收益、收益波动与投资者情绪[J]. 经济研究, 2004(10): 75-83.
+\bibitem{yin2019} 尹海员, 吴兴颖. 投资者高频情绪对股票日内收益率的预测作用[J]. 中国工业经济, 2019(8): 80-98.
+\bibitem{yang2023} 杨何灿, 吴隽豪, 杨咸月. 北向资金与境内股票市场流动性：基于高频数据的传导机制[J]. 经济研究, 2023, 58(5): 190-208.
+\end{thebibliography}
 
 \end{document}

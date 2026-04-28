@@ -1,0 +1,4 @@
+sample_type,model,n_obs,train_r2,adj_r2_train,test_r2_os,test_rmse,test_mae,aic,bic
+rolling,HAR_OLS,1493,0.792447,0.792029,0.823280,0.002109,0.001363,-13891.855737,-13870.621566
+nonoverlap,HAR_OLS_nonoverlap,298,0.758372,0.755907,0.855623,0.001835,0.001225,-2735.846631,-2721.058257
+nonoverlap,HARX_lite_OLS_nonoverlap,298,0.758893,0.754764,0.852981,0.001852,0.001253,-2732.489346,-2710.306786

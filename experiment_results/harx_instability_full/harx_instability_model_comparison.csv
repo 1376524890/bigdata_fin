@@ -1,0 +1,11 @@
+target,model,best_params,train_r2,adj_r2_train,test_r2_os,test_rmse,test_mae
+future_absret_5,Mean_Benchmark,train_mean,,,0.000000,0.005018,0.003247
+future_absret_5,HAR_OLS,OLS,0.792447,0.792029,0.823280,0.002109,0.001363
+future_absret_5,HARX_OLS,OLS,0.793136,0.792161,0.821714,0.002119,0.001374
+future_absret_5,HARX_lite_OLS,OLS,0.792689,0.791992,0.821946,0.002117,0.001375
+future_absret_5,HAR_Ridge,alpha=100,0.788449,0.788022,0.807824,0.002200,0.001410
+future_absret_5,HARX_Ridge,alpha=100,0.789137,0.788143,0.806074,0.002210,0.001424
+future_logrv_20,HAR_OLS,OLS,0.975381,0.975331,0.958885,0.152547,0.080987
+future_logrv_20,HARX_OLS,OLS,0.975429,0.975313,0.958755,0.152790,0.081908
+future_logrv_20,HAR_Ridge,alpha=0.01,0.975381,0.975331,0.958885,0.152548,0.080990
+future_logrv_20,HARX_Ridge,alpha=0.01,0.975429,0.975313,0.958754,0.152790,0.081911
