@@ -36,7 +36,7 @@ SAMPLE_START = '2015-07-02'
 SAMPLE_END = '2025-12-25'
 TRAIN_RATIO = 0.6
 
-OUTPUT_DIR = '/home/marktom/bigdata-fin/experiment_results/harx_final_checks'
+OUTPUT_DIR = '/home/marktom/bigdata-fin/har/results/harx_final_checks'
 DATA_FILE = '/home/marktom/bigdata-fin/real_data_complete.csv'
 
 # ==================== 辅助函数 ====================

@@ -40,7 +40,7 @@ TRAIN_RATIO = 0.6
 VAL_RATIO_IN_TRAIN = 0.2  # 训练集后20%用于验证（仅Ridge调参）
 RIDGE_ALPHAS = [0.01, 0.1, 1, 10, 100, 1000]
 
-OUTPUT_DIR = '/home/marktom/bigdata-fin/experiment_results/harx_instability_full'
+OUTPUT_DIR = '/home/marktom/bigdata-fin/har/results/harx_instability_full'
 DATA_FILE = '/home/marktom/bigdata-fin/real_data_complete.csv'
 
 # ==================== 辅助函数 ====================

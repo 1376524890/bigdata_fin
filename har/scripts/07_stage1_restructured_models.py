@@ -25,9 +25,9 @@ from statsmodels.tools.tools import add_constant
 warnings.filterwarnings("ignore")
 np.random.seed(42)
 
-BASE_DIR = Path(__file__).resolve().parents[1]
+BASE_DIR = Path(__file__).resolve().parents[2]
 DATA_PATH = BASE_DIR / "real_data_complete.csv"
-RESULT_DIR = BASE_DIR / "experiment_results" / "stage1_restructured_models"
+RESULT_DIR = BASE_DIR / "har" / "results" / "stage1_restructured_experiment"
 RESULT_DIR.mkdir(parents=True, exist_ok=True)
 
 WINDOWS = (5, 60)
@@ -1311,7 +1311,7 @@ def generate_report(all_results, vif_summary, df_test):
 ---
 
 **生成时间**: 2026-04-24
-**实验脚本**: experiment_pipeline/07_stage1_restructured_models.py
+**实验脚本**: har/scripts/07_stage1_restructured_models.py
 """
 
     with open(RESULT_DIR / "stage1_restructured_models_report.md", "w", encoding="utf-8") as f:

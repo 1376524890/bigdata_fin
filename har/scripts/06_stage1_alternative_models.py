@@ -23,9 +23,9 @@ from statsmodels.tools.tools import add_constant
 
 warnings.filterwarnings("ignore")
 
-BASE_DIR = Path(__file__).resolve().parents[1]
+BASE_DIR = Path(__file__).resolve().parents[2]
 DATA_PATH = BASE_DIR / "real_data_complete.csv"
-RESULT_DIR = BASE_DIR / "experiment_results"
+RESULT_DIR = BASE_DIR / "har" / "results"
 FIGURE_DIR = RESULT_DIR / "figures"
 RESULT_DIR.mkdir(parents=True, exist_ok=True)
 FIGURE_DIR.mkdir(parents=True, exist_ok=True)

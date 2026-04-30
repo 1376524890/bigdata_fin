@@ -429,7 +429,7 @@ def fit_ridge(X_train, y_train, X_val, y_val, X_test, y_test,
 def run_experiment():
     """运行完整实验"""
 
-    output_dir = '/home/marktom/bigdata-fin/experiment_results/stage1_harx_paper'
+    output_dir = '/home/marktom/bigdata-fin/har/results/stage1_harx_paper'
 
     # 1. 加载数据
     df = load_data('/home/marktom/bigdata-fin/real_data_complete.csv')
@@ -1631,7 +1631,7 @@ def generate_report(output_dir):
 # =====================================================
 
 if __name__ == '__main__':
-    output_dir = '/home/marktom/bigdata-fin/experiment_results/stage1_harx_paper'
+    output_dir = '/home/marktom/bigdata-fin/har/results/stage1_harx_paper'
 
     print("=" * 60)
     print("第一阶段 HARX 短期不稳定性基准模型实验")

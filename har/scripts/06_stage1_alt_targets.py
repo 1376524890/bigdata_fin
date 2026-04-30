@@ -1605,7 +1605,7 @@ def generate_report(results, importance_data, output_dir):
 # =====================================================
 
 if __name__ == '__main__':
-    output_dir = '/home/marktom/bigdata-fin/experiment_results/stage1_alt_targets'
+    output_dir = '/home/marktom/bigdata-fin/har/results/stage1_alt_targets'
 
     print("=" * 60)
     print("第一阶段替代因变量实验")

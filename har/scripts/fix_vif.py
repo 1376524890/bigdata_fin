@@ -12,7 +12,7 @@ import pandas as pd
 import statsmodels.api as sm
 from statsmodels.stats.outliers_influence import variance_inflation_factor
 
-OUTPUT_DIR = '/home/marktom/bigdata-fin/experiment_results/harx_instability_full'
+OUTPUT_DIR = '/home/marktom/bigdata-fin/har/results/harx_instability_full'
 DATA_FILE = '/home/marktom/bigdata-fin/real_data_complete.csv'
 
 def compute_vif_fixed(X, feature_names):
